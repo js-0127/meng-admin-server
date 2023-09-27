@@ -1,0 +1,17 @@
+# 使用 Node.js 14 作为基础镜像
+FROM node:18
+
+# 在容器中创建一个新的目录来存储应用程序文件
+WORKDIR /app
+
+# 将所有应用程序文件复制到容器中
+COPY . .
+
+# 安装依赖项
+RUN npm install
+
+# 将端口 3000 暴露出来
+EXPOSE 3000
+
+# 在容器中运行应用程序
+CMD ["npm", "start"]

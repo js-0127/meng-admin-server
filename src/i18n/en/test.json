@@ -1,0 +1,8 @@
+{
+  "hello": "hello",
+  "animals": [
+    "cat",
+    "dog",
+    "elephant"
+  ]
+}
