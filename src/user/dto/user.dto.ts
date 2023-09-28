@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import {IsNotEmpty, IsPhoneNumber, IsEmail} from 'class-validator'
 import { IsExistRule } from 'src/utils/user/is_exist'
-export class CreateUserDto {
+export class UserDto {
     @IsExistRule('user', { message: '用户名已存在' })
     @ApiProperty({ description: '用户名称' })
     @IsNotEmpty({message: '用户名不能为空'})

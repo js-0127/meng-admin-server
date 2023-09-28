@@ -9,6 +9,7 @@ import { TokenVO } from './dto/token.dto';
 import { uuid } from 'src/utils/common/uuid';
 import { RedisClientType } from 'redis';
 import { ConfigService } from '@nestjs/config';
+import { RefreshTokenDTO } from './dto/refreshToken.dto';
 @Injectable() 
 export class AuthService {
   
@@ -124,11 +125,42 @@ export class AuthService {
     
 
  //获取公钥
-   async getPublicKey(): Promise<string>{
+  public async getPublicKey(): Promise<string>{
          const key = new NodeRSA({b: 512});
          const publicKey = key.exportKey('public')
          const privateKey = key.exportKey('private')
          await this.redisClient.set(`publicKey:${publicKey}`, privateKey);
          return publicKey
+   }
+
+
+   //刷新token
+   public async refreshToken(dto: RefreshTokenDTO): Promise<TokenVO>{
+          const userId = await this.redisClient.get(
+            `refreshToken${dto.refreshToken}`
+          );
+
+          if(!userId){
+            throw R.error('刷新token失败')
+          }
+
+          const expire = this.config.get<number>('EXPIRE')
+          const token = uuid()
+
+          await this.redisClient
+                 .multi()
+                 .set(`token:${token}`, userId)
+                 .expire(`token${token}`, expire)
+                 .exec()
+
+          const refreshExpire = await this.redisClient.ttl(
+            `refreshToken:${dto.refreshToken}`
+          )
+          return {
+            expire,
+            token,
+            refreshExpire,
+            refreshToken: dto.refreshToken
+          } as TokenVO
    }
 }

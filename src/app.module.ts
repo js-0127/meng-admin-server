@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import {  
   AcceptLanguageResolver,
   I18nModule,
@@ -14,8 +14,10 @@ import * as path  from 'path';
 import { LoggerModule } from './logger/logger.module';
 import {LoggerMiddleware} from "./logger/logger.middleware";
 import { AuthModule } from './auth/auth.module';
-import { ValidateExceptionFilter } from './common/validate.filter';
+import { ValidateExceptionFilter } from './common/filter/validate.filter';
 import {ConfigModule, ConfigService}  from '@nestjs/config'
+import { CacheModule } from './cache/cache.module';
+import { AuthInterceptor } from './common/interceptor/auth.interceptor';
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
@@ -29,9 +31,14 @@ import {ConfigModule, ConfigService}  from '@nestjs/config'
     ],
   }), AuthModule, ConfigModule.forRoot({
     isGlobal: true
-  })],
+  }), CacheModule],
   controllers: [AppController],
-  providers: [AppService, PrismaService, LoggerService, ConfigService
+  providers: [AppService, PrismaService, LoggerService, ConfigService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuthInterceptor,
+    }
+    
   //  {
   //   provide: 'APP_FILTER',
   //   useClass: ValidateExceptionFilter

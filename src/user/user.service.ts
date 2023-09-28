@@ -1,6 +1,6 @@
 import {  Injectable, ParseIntPipe } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto } from './dto/create_user.dto';
+import { UserDto } from './dto/user.dto';
 import { hash, verify } from 'argon2';
 import { UpdateUserDto } from './dto/update_user.dto';
 import {has, omit} from 'lodash'
@@ -49,8 +49,18 @@ export class UserService {
           total
         }
   }
+  
+  async findUserById(id:number) {
+       const user = await this.prisma.user.findUnique({
+        where: {
+          id
+        }
+       })
+       return user
+  }
 
-  async createUser(createUserDto: CreateUserDto){
+
+  async createUser(createUserDto: UserDto){
      return await this.prisma.user.create({
       data: {
         ...createUserDto,
@@ -70,7 +80,6 @@ export class UserService {
       }
     })
   }
-  
 
   async deleteUser( id:number){
      return await this.prisma.user.delete({
