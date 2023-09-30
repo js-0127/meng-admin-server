@@ -1,4 +1,4 @@
-import { Body, Inject, Injectable, Post } from '@nestjs/common';
+import { Body, Inject, Injectable, Post, Req } from '@nestjs/common';
 import { CaptchaType, LoginDto } from './dto/login.dto';
 import * as svgCaptcha from 'svg-captcha';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -10,6 +10,7 @@ import { uuid } from 'src/utils/common/uuid';
 import { RedisClientType } from 'redis';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenDTO } from './dto/refreshToken.dto';
+import {Request} from 'express'
 @Injectable() 
 export class AuthService {
   
@@ -110,7 +111,7 @@ export class AuthService {
 
     await this.redisClient
     .multi()
-    .set(`token:${token}`, user.id)
+    .set(`token:${token}`, JSON.stringify({userId: user.id, refreshToken}))
     .expire(`token:${token}`, expire)
     .set(`refreshToken:${refreshToken}`, user.id)
     .expire(`refreshToken:${refreshToken}`, refreshExpire)
@@ -139,11 +140,9 @@ export class AuthService {
           const userId = await this.redisClient.get(
             `refreshToken${dto.refreshToken}`
           );
-
           if(!userId){
             throw R.error('刷新token失败')
           }
-
           const expire = this.config.get<number>('EXPIRE')
           const token = uuid()
 
@@ -162,5 +161,20 @@ export class AuthService {
             refreshExpire,
             refreshToken: dto.refreshToken
           } as TokenVO
-   }
+        }
+
+        //退出登录
+        async logout(req:Request){
+          const res = await this.redisClient
+            .multi()
+            .del(`token${req['token']}`)
+            .del(`refreshToken${req['userInfo'].refreshToken}`)
+            .exec()
+            
+            
+            if(res.some(item => item[0])){
+              throw R.error('退出登录失败')
+            }
+            return true
+        }
 }

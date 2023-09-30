@@ -47,7 +47,7 @@ export class AuthController {
     return this.authService.getPublicKey()
   }
 
-  @Post('/refresh/token')
+  @Post('refresh/token')
   @ApiOperation({
     summary: '刷新token'
   })
@@ -57,11 +57,16 @@ export class AuthController {
 
   //获取用户信息
   @Get('current/user')
-
-
+  //@ts-ignore
   async getCurrentUser(@Req() req:Request) : Promise<UserVo> {
-    
-     let user = this.userService.findUserById(req['userInfo'].userId)
-     return Object.assign(omit(user, ['password', 'avatar']))
+     let user = await this.userService.findUserById(req['userInfo'].userId)
+     return user
+  }
+
+  //退出登录
+  @Post('logout')
+  async logout(@Req() req:Request): Promise<boolean>{
+       //清除token和refreshToken
+       return this.authService.logout(req)
   }
 }

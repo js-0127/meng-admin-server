@@ -1,9 +1,9 @@
-import {  Injectable, ParseIntPipe } from '@nestjs/common';
+import {  Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { hash, verify } from 'argon2';
 import { UpdateUserDto } from './dto/update_user.dto';
-import {has, omit} from 'lodash'
+import { omit} from 'lodash'
 @Injectable()
 export class UserService {
   constructor(
@@ -56,7 +56,8 @@ export class UserService {
           id
         }
        })
-       return user
+       
+      return omit(user, ['password', 'avatar'])
   }
 
 

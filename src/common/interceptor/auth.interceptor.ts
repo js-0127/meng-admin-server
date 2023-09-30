@@ -26,6 +26,8 @@ export class AuthInterceptor implements NestInterceptor {
     } 
 
     const userInfoStr = await this.redisClient.get(`token:${token}`)
+
+    
     if(!userInfoStr) {
       throw R.unauthorizedError('未授权')
     }
