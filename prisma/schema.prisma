@@ -11,7 +11,7 @@ datasource db {
 }
 
 model user {
-  id       Int    @id @default(autoincrement()) @db.UnsignedInt()
+  id       String @id @unique
   userName String @unique
   nickName String 
   password String

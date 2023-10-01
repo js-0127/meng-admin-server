@@ -9,6 +9,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+
   create(@Body() createUserDto: UserDto) {    
     return this.userService.createUser(createUserDto);
   }
@@ -28,12 +29,12 @@ export class UserController {
 
 
   @Put()
-  update(@Body('id', ParseIntPipe) id:number, @Body() body:UpdateUserDto){
+  update(@Body('id') id:string, @Body() body:UpdateUserDto){
     return this.userService.updateUser(id, body)
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id:number){
+  delete(@Param('id') id:string){
       return this.userService.deleteUser(id)
   }
 }

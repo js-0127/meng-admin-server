@@ -13,7 +13,6 @@ import { RefreshTokenDTO } from './dto/refreshToken.dto';
 import {Request} from 'express'
 @Injectable() 
 export class AuthService {
-  
    //保存验证码
   private captchas: Map<string, CaptchaType> = new Map();
   public validaeCaptcha: CaptchaType;

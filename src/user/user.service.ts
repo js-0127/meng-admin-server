@@ -4,6 +4,7 @@ import { UserDto } from './dto/user.dto';
 import { hash, verify } from 'argon2';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { omit} from 'lodash'
+import { snowFlake } from 'src/utils/common/snow-flake';
 @Injectable()
 export class UserService {
   constructor(
@@ -50,7 +51,7 @@ export class UserService {
         }
   }
   
-  async findUserById(id:number) {
+  async findUserById(id:string) {
        const user = await this.prisma.user.findUnique({
         where: {
           id
@@ -60,10 +61,12 @@ export class UserService {
       return omit(user, ['password', 'avatar'])
   }
 
-
+ 
   async createUser(createUserDto: UserDto){
      return await this.prisma.user.create({
+     
       data: {
+        id: snowFlake.nextId().toString(),
         ...createUserDto,
         sex: +createUserDto.sex,
         password: await hash('123456')
@@ -71,7 +74,7 @@ export class UserService {
      })
   }
 
-  async updateUser(id:number, updateUserDto: UpdateUserDto){
+  async updateUser(id:string, updateUserDto: UpdateUserDto){
     return  await this.prisma.user.update({
       where: {
         id
@@ -82,7 +85,7 @@ export class UserService {
     })
   }
 
-  async deleteUser( id:number){
+  async deleteUser( id:string){
      return await this.prisma.user.delete({
       where: {
         id

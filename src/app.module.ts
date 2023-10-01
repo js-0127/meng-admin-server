@@ -18,6 +18,7 @@ import { ValidateExceptionFilter } from './common/filter/validate.filter';
 import {ConfigModule, ConfigService}  from '@nestjs/config'
 import { CacheModule } from './cache/cache.module';
 import { AuthInterceptor } from './common/interceptor/auth.interceptor';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
@@ -31,7 +32,7 @@ import { AuthInterceptor } from './common/interceptor/auth.interceptor';
     ],
   }), AuthModule, ConfigModule.forRoot({
     isGlobal: true
-  }), CacheModule],
+  }), CacheModule, UploadModule],
   controllers: [AppController],
   providers: [AppService, PrismaService, LoggerService, ConfigService,
     {
