@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInt
 import { UploadService } from './upload.service';
 import { NotLogin } from 'src/common/decorator/not-login.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-
+import {Request} from 'express'
+import { AuthInterceptor } from 'src/common/interceptor/auth.interceptor';
 
 @Controller('file')
 export class UploadController {
@@ -11,7 +12,9 @@ export class UploadController {
   @Post('upload')
   @NotLogin()
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File){   
+
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req:Request){   
+    console.log(Req['userInfo']);
    return  await this.uploadService.uploadFile(file);
   }
 

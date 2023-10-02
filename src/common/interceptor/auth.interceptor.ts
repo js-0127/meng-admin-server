@@ -34,8 +34,7 @@ export class AuthInterceptor implements NestInterceptor {
 
     const userInfo = JSON.parse(userInfoStr)
     req['userInfo'] = userInfo
-    req['token'] = token
-
+    req['token'] = token 
     return next.handle();
   }
 }

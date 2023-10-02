@@ -119,12 +119,14 @@ export class UserService {
         },
       });
     } else if(!fileRecord && updateUserDto.avatar) {
-      await this.prisma.file.create({
+     const user = await this.prisma.file.create({
         data: {
          ...omit(updateUserDto.avatar, ['pkValue']),
          userId: id,
         }
       })
+      console.log(user);
+      
     }
 
     return  await this.prisma.user.update({
