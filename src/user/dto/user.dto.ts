@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { File } from 'buffer'
 import {IsNotEmpty, IsPhoneNumber, IsEmail} from 'class-validator'
 import { IsExistRule } from 'src/utils/user/is_exist'
 export class UserDto {
@@ -30,9 +31,8 @@ export class UserDto {
     password: string
 
     @ApiProperty({ description: '头像', nullable:true })
-    avatar?: string;
+    avatar?: Avatar
 
     @ApiProperty({ description: '性别(0:女, 1:男)', nullable:true })
     sex?: number;
-
 }

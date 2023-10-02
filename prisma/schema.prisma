@@ -10,8 +10,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  id       String @id @unique
+model User {
+  id       String @id 
   userName String @unique
   nickName String 
   password String
@@ -21,5 +21,14 @@ model user {
   sex Int?
   createdAt  DateTime @default(now())
   updateAt   DateTime @updatedAt()
+  files File[]
+}
 
+model File {
+  pkValue String @id @default(uuid())
+  pkName String 
+  fileName String? 
+  filePath String? 
+  userId String 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

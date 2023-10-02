@@ -9,8 +9,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-
-  create(@Body() createUserDto: UserDto) {    
+  @NotLogin()
+  create(@Body() createUserDto: UserDto) {   
+    console.log(createUserDto);
+     
     return this.userService.createUser(createUserDto);
   }
  
