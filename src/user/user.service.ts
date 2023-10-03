@@ -1,24 +1,33 @@
-import {  Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import {  Inject, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/services/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { hash, verify } from 'argon2';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { omit} from 'lodash'
 import { snowFlake } from 'src/utils/common/snow-flake';
 import { UploadService } from 'src/upload/upload.service';
+import { RedisClientType } from 'redis';
+import { R } from 'src/utils/common/error';
+import { EmailService } from 'src/services/mail.service';
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly upload: UploadService
+    private readonly upload: UploadService,
+    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+    private readonly emailService: EmailService
     ){}
-    
-  async findAll() {
-     const user = await this.prisma.user.findMany()
-     return user
-  }
+
+
+    async findUserById(id: string){
+        return await this.prisma.user.findUnique({
+          where: {
+            id
+          }
+        })
+    }
    
-  async findByPage(parma: { page: string | number; size: string | number; nickName: any; phoneNumber: any; }){
+  async findByPage(parma: { page: string | number; size: string | number; nickName?: string; phoneNumber?: string; }){
          const page = +parma.page ? +parma.page : 1
          const skip = (page - 1) * (+parma.size)
          const take = +parma.size
@@ -52,30 +61,22 @@ export class UserService {
         }
   }
   
-  async findUserById(id:string) {
-       const user = await this.prisma.user.findUnique({
-        where: {
-          id
-        },   
-       })
-       
-      return omit(user, ['password', 'avatar'])
-  }
-
- 
   async createUser(createUserDto: UserDto){
     const id = snowFlake.nextId().toString()
+    const password = '123456'
 
+    const emailCaptcha = await this.redisClient.get(`emailCaptcha:${createUserDto.email}`)
+    if(emailCaptcha !== createUserDto.emailCaptcha){
+      throw R.error('邮箱验证码错误或失效')
+    } 
      await this.prisma.user.create({
       data: {
         id: id,
-        ...createUserDto,
-        sex: +createUserDto.sex,
-        password: await hash('123456'),
-        avatar: createUserDto.avatar.pkValue
+        ...omit(createUserDto, ['emailCaptcha']),
+        password: await hash(password),
+        avatar: createUserDto.avatar?.pkValue ? createUserDto.avatar?.pkValue : undefined
       }
      })
-       
      if(createUserDto.avatar){
       await this.prisma.file.updateMany({
         where: {
@@ -87,6 +88,16 @@ export class UserService {
         }
       })
      }
+      this.emailService.sendEmail({
+      to: createUserDto.email,
+      subject: 'meng-admin平台账号创建成功',
+      html: `<div>
+      <p><span style="color:#5867dd;">${createUserDto.nickName}</span>, 你的账号开通成功<p>
+      <p>登录账号: ${createUserDto.email}</p>
+      <p>登陆密码: ${password}</p>
+      </div>
+      `
+     })
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
     //根据用户id查询文件表
@@ -125,10 +136,7 @@ export class UserService {
          userId: id,
         }
       })
-      console.log(user);
-      
     }
-
     return  await this.prisma.user.update({
       where: {
         id

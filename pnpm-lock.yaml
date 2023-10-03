@@ -52,6 +52,9 @@ dependencies:
   node-rsa:
     specifier: ^1.1.1
     version: registry.npmmirror.com/node-rsa@1.1.1
+  nodemailer:
+    specifier: ^6.9.5
+    version: registry.npmmirror.com/nodemailer@6.9.5
   prisma-binding:
     specifier: ^2.3.16
     version: registry.npmmirror.com/prisma-binding@2.3.16
@@ -96,6 +99,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.6.3
     version: registry.npmmirror.com/@types/node@20.6.3
+  '@types/nodemailer':
+    specifier: ^6.4.11
+    version: registry.npmmirror.com/@types/nodemailer@6.4.11
   '@types/supertest':
     specifier: ^2.0.12
     version: registry.npmmirror.com/@types/supertest@2.0.12
@@ -1746,6 +1752,14 @@ packages:
     resolution: {integrity: sha512-HksnYH4Ljr4VQgEy2lTStbCKv/P590tmPe5HqOnv9Gprffgv5WXAY+Y5Gqniu0GGqeTCUdBnzC3QSrzPkBkAMA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/node/-/node-20.6.3.tgz}
     name: '@types/node'
     version: 20.6.3
+    dev: true
+
+  registry.npmmirror.com/@types/nodemailer@6.4.11:
+    resolution: {integrity: sha512-Ld2c0frwpGT4VseuoeboCXQ7UJIkK3X7Lx/4YsZEiUHtHsthWAOCYtf6PAiLhMtfwV0cWJRabLBS3+LD8x6Nrw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.11.tgz}
+    name: '@types/nodemailer'
+    version: 6.4.11
+    dependencies:
+      '@types/node': registry.npmmirror.com/@types/node@20.6.3
     dev: true
 
   registry.npmmirror.com/@types/parse-json@4.0.0:
@@ -6185,6 +6199,13 @@ packages:
     version: 1.1.1
     dependencies:
       asn1: registry.npmmirror.com/asn1@0.2.6
+    dev: false
+
+  registry.npmmirror.com/nodemailer@6.9.5:
+    resolution: {integrity: sha512-/dmdWo62XjumuLc5+AYQZeiRj+PRR8y8qKtFCOyuOl1k/hckZd8durUUHs/ucKx6/8kN+wFxqKJlQ/LK/qR5FA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/nodemailer/-/nodemailer-6.9.5.tgz}
+    name: nodemailer
+    version: 6.9.5
+    engines: {node: '>=6.0.0'}
     dev: false
 
   registry.npmmirror.com/nopt@5.0.0:

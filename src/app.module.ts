@@ -7,7 +7,7 @@ import {
 } from 'nestjs-i18n'
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './services/prisma.service';
 import { UserModule } from './user/user.module';
 import { LoggerService } from './logger/logger.service';
 import * as path  from 'path';
@@ -19,6 +19,7 @@ import {ConfigModule, ConfigService}  from '@nestjs/config'
 import { CacheModule } from './cache/cache.module';
 import { AuthInterceptor } from './common/interceptor/auth.interceptor';
 import { UploadModule } from './upload/upload.module';
+import { EmailService } from './services/mail.service';
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
@@ -34,7 +35,7 @@ import { UploadModule } from './upload/upload.module';
     isGlobal: true
   }), CacheModule, UploadModule],
   controllers: [AppController],
-  providers: [AppService, PrismaService, LoggerService, ConfigService,
+  providers: [AppService, PrismaService, LoggerService, ConfigService, EmailService,
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthInterceptor,

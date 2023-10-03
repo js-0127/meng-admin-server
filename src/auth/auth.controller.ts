@@ -8,15 +8,12 @@ import { NotLogin } from 'src/common/decorator/not-login.decorator';
 import { UserVo } from 'src/user/vo/user.vo';
 import { UserService } from 'src/user/user.service';
 import { Request } from 'express';
-import { omit } from 'lodash';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService, 
-    private readonly userService: UserService
+    private readonly userService: UserService,
     ) {}
-  
-
   @Post('login')
   @NotLogin()
   @ApiOperation({

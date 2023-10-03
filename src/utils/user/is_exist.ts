@@ -19,7 +19,7 @@ export function IsExistRule(
             validator: {
                 async validate(value: any, args: ValidationArguments) {
                     const prisma = new PrismaClient()
-                    const result = await prisma[table].findFirst({
+                    const result = await prisma[table].findUnique({
                         where: {
                             [propertyName]: args.value
                         }

@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {MINIO_CONNECTION} from 'nestjs-minio'
 import {Client} from 'minio'
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/services/prisma.service';
+import { snowFlake } from 'src/utils/common/snow-flake';
 
 @Injectable()
 export class UploadService {
@@ -15,13 +16,15 @@ export class UploadService {
   async uploadFile(file:Express.Multer.File){
     const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1e10)}_${file.originalname}`;
            // 上传文件到minio服务器
-          await this.minioClient.putObject(this.bucketName, fileName, file.buffer)
-          const fileEntity = await this.createFile(fileName)
-          return fileEntity;
+           const fileEntity = await this.createFile(fileName)
+          const data =  await this.minioClient.putObject(this.bucketName, fileName, file.buffer)
+         
+          return data;
   }
 
   async createFile(fileName: string){
     const fileInfo = await this.prisma.$transaction(async(prisma) => {
+      const id = snowFlake.nextId()
       const fileEntity = await prisma.file.create({
         data: {
           pkName: 'user_avatar',
@@ -32,7 +35,6 @@ export class UploadService {
       })
       return fileEntity
     })
-
     return fileInfo;
   }
   }

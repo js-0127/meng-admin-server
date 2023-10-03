@@ -1,7 +1,7 @@
 import { Body, Inject, Injectable, Post, Req } from '@nestjs/common';
 import { CaptchaType, LoginDto } from './dto/login.dto';
 import * as svgCaptcha from 'svg-captcha';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/services/prisma.service';
 import {R} from '../utils/common/error'
 import {verify} from 'argon2'
 import * as NodeRSA from 'node-rsa'

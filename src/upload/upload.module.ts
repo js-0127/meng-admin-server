@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { UploadService } from './upload.service';
 import { UploadController } from './upload.controller';
 import { NestMinioModule } from 'nestjs-minio';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/services/prisma.service';
 
 @Global()
 @Module({
