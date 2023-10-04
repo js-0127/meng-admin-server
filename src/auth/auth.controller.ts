@@ -8,11 +8,14 @@ import { NotLogin } from 'src/common/decorator/not-login.decorator';
 import { UserVo } from 'src/user/vo/user.vo';
 import { UserService } from 'src/user/user.service';
 import { Request } from 'express';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { RsaService } from 'src/services/rsa.service';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService, 
     private readonly userService: UserService,
+    private readonly RsaService: RsaService
     ) {}
   @Post('login')
   @NotLogin()
@@ -34,14 +37,13 @@ export class AuthController {
     return new CaptchaEntity(data)
   }
  
-  
   @Get('publicKey')
   @NotLogin()
   @ApiOperation({
     summary: '获取公钥'
   })
   getPublicKey(){
-    return this.authService.getPublicKey()
+    return this.RsaService.getPublicKey()
   }
 
   @Post('refresh/token')
@@ -65,5 +67,20 @@ export class AuthController {
   async logout(@Req() req:Request): Promise<boolean>{
        //清除token和refreshToken
        return this.authService.logout(req)
+  }
+
+  //修改密码时发送邮箱验证码
+  @Post('send/reset/password/email')
+  @NotLogin()
+  async sendResetPasswordEmail(@Body() emailInfo: {email: string}){
+        return this.authService.sendResetPasswordEmail(emailInfo)
+  }
+
+  //修改密码
+  @Post('reset/password')
+  @NotLogin()
+
+ async resetPassword(@Body() resetPasswordDto: ResetPasswordDto){
+        return this.authService.resetPassword(resetPasswordDto)
   }
 }

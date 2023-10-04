@@ -3,14 +3,19 @@ import { CaptchaType, LoginDto } from './dto/login.dto';
 import * as svgCaptcha from 'svg-captcha';
 import { PrismaService } from 'src/services/prisma.service';
 import {R} from '../utils/common/error'
-import {verify} from 'argon2'
-import * as NodeRSA from 'node-rsa'
+import {generateRandomCode} from '../utils/common/uuid'
+import {hash, verify} from 'argon2'
+
 import { TokenVO } from './dto/token.dto';
 import { uuid } from 'src/utils/common/uuid';
 import { RedisClientType } from 'redis';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokenDTO } from './dto/refreshToken.dto';
 import {Request} from 'express'
+import { EmailService } from 'src/services/mail.service';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { RsaService } from 'src/services/rsa.service';
+
 @Injectable() 
 export class AuthService {
    //保存验证码
@@ -20,7 +25,9 @@ export class AuthService {
   constructor(
     private readonly prisma:PrismaService,
     private readonly config: ConfigService,
-   @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType
+   @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+   private readonly EmailService: EmailService,
+   private readonly RsaService: RsaService
     ) {}
   /**
    * @description 返回验证码
@@ -74,21 +81,11 @@ export class AuthService {
       throw R.error('用户名错误')
     }
 
-    //获取私钥
-    const privateKey = await this.redisClient.get(
-      `publicKey:${loginDto.publicKey}`
-    );
-    
-    //删除私钥
-    await this.redisClient.del(`publicKey:${loginDto.publicKey}`)
-
-    if(!privateKey) {
-      throw R.error('解密私钥错误或已失效')
-    }
-    //把密码解密
-    const decrypt = new NodeRSA(privateKey)
-    decrypt.setOptions({encryptionScheme: 'pkcs1'});
-    const password = decrypt.decrypt(loginDto.password, 'utf8');
+    //获取私钥并且,把密码解密
+   const password =  await this.RsaService.decrypt(loginDto.publicKey, loginDto.password)
+   //删除私钥
+   await this.redisClient.del(`publicKey:${loginDto.publicKey}`)
+   
     if(!password) {
       throw R.error('登陆出现异常,请重新登录');
     }
@@ -114,6 +111,8 @@ export class AuthService {
     .expire(`token:${token}`, expire)
     .set(`refreshToken:${refreshToken}`, user.id)
     .expire(`refreshToken:${refreshToken}`, refreshExpire)
+    .sAdd(`userToken_${user.id}`, token)
+    .sAdd(`userRefreshToken_${user.id}`, refreshToken)
     .exec()
     return {
       expire,
@@ -122,17 +121,6 @@ export class AuthService {
       refreshToken,
     } as TokenVO;
 } 
-    
-
- //获取公钥
-  public async getPublicKey(): Promise<string>{
-         const key = new NodeRSA({b: 512});
-         const publicKey = key.exportKey('public')
-         const privateKey = key.exportKey('private')
-         await this.redisClient.set(`publicKey:${publicKey}`, privateKey);
-         return publicKey
-   }
-
 
    //刷新token
    public async refreshToken(dto: RefreshTokenDTO): Promise<TokenVO>{
@@ -175,5 +163,100 @@ export class AuthService {
               throw R.error('退出登录失败')
             }
             return true
+        }
+
+
+        //修改密码时发送邮箱验证码
+        async sendResetPasswordEmail(emailInfo:{email:string}){
+               if(!emailInfo.email) {
+                throw R.error('邮箱不能为空')
+               }
+
+               const user  = await this.prisma.user.findUnique({
+                where: {
+                  email: emailInfo.email
+                }
+               })
+               if(!user) {
+                throw R.error('不存在当前邮箱')
+               }
+            
+               const emailCaptcha = generateRandomCode()
+
+               await this.redisClient
+               .multi()
+               .set(`resetPasswordEmailCaptcha:${emailCaptcha}`, emailCaptcha)
+               .expire(`resetPasswordEmailCaptcha:${emailCaptcha}`, 60 * 30)
+               .exec()
+                 
+
+               const resetPasswordUrl = ''
+
+               await this.EmailService.sendEmail({
+                to: emailInfo.email,
+                html: `<div style="padding: 28px 0; color: #888;">
+                <h1 style="color: #888;">
+                  <span style="color:#5867dd; margin:0 1px;"><a>${emailInfo.email}</a></span>, 你好！
+                </h1>
+                <p>请先确认本邮件是否是你需要的。</p>
+                <p>请点击下面的地址，根据提示进行密码重置：</p>
+                <a href="${resetPasswordUrl}" target="_blank" style="text-decoration: none;
+                display: inline-block;
+                padding: 8px 25px;
+                background: #5867dd;
+                cursor: pointer;
+                color: #fff;
+                border-radius: 5px;" rel="noopener">点击跳转到密码重置页面</a>
+                <p>如果单击上面按钮没有反应，请复制下面链接到浏览器窗口中，或直接输入链接。</p>
+                <p>
+                  ${resetPasswordUrl}
+                </p>
+                <p>如您未提交该申请，请不要理会此邮件，对此为您带来的不便深表歉意。</p>
+                <p>本次链接30分钟后失效。</p>
+                <div style="text-align: right;margin-top: 50px;">
+                  <span>meng-admin</span>
+                </div>
+              </div>`,
+                subject: 'meng-admin平台密码重置提醒',
+              });
+        }
+
+
+        async resetPassword(resetPasswordDto: ResetPasswordDto){
+           const captcha = await this.redisClient.get(`resetPasswordEmailCaptcha:${resetPasswordDto.email}`)
+           if(captcha !== resetPasswordDto.emailCaptcha){
+            throw R.error('邮箱验证码错误或已失效')
+           }
+
+           const user = await this.prisma.user.findUnique({
+            where: {
+              email: resetPasswordDto.email
+            }
+           })
+
+           if(!user) throw R.error('邮箱不存在')
+           
+           const password = await this.RsaService.decrypt(resetPasswordDto.publicKey, resetPasswordDto.password)
+           
+           const token = await this.redisClient.sMembers(`userToken_${user.id}`)
+           const refreshToken = await this.redisClient.sMembers(`userRefreshToken_${user.id}`)
+
+           await this.prisma.$transaction(async(prisma) => {
+              const hashPassword = await hash(password)
+              await this.prisma.user.updateMany({
+                where: {
+                  email: resetPasswordDto.email
+                },
+                data: {
+                    password: hashPassword
+                }
+              })
+
+              await Promise.all([
+                ...token.map((token) => this.redisClient.del(`token:${token}`)),
+                ...refreshToken.map((refreshToken) => this.redisClient.del(`refreshToken:${refreshToken}`)),
+                this.redisClient.del(`resetPasswordEmailCapthca:${resetPasswordDto.email}`)
+              ])
+           })
         }
 }

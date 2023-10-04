@@ -99,6 +99,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.6.3
     version: registry.npmmirror.com/@types/node@20.6.3
+  '@types/node-rsa':
+    specifier: ^1.1.2
+    version: registry.npmmirror.com/@types/node-rsa@1.1.2
   '@types/nodemailer':
     specifier: ^6.4.11
     version: registry.npmmirror.com/@types/nodemailer@6.4.11
@@ -1746,6 +1749,14 @@ packages:
     version: 1.4.8
     dependencies:
       '@types/express': registry.npmmirror.com/@types/express@4.17.17
+    dev: true
+
+  registry.npmmirror.com/@types/node-rsa@1.1.2:
+    resolution: {integrity: sha512-9knJ07OLdOhD2EughqP+M4VPgASth9KodZT4Zdc78sAoyp5rXAwVg+gmTZ2ccQKbZic9cC0uCSCTcybWEINNsw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/node-rsa/-/node-rsa-1.1.2.tgz}
+    name: '@types/node-rsa'
+    version: 1.1.2
+    dependencies:
+      '@types/node': registry.npmmirror.com/@types/node@20.6.3
     dev: true
 
   registry.npmmirror.com/@types/node@20.6.3:
