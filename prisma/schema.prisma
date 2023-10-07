@@ -21,14 +21,11 @@ model User {
   sex Int?
   createdAt  DateTime @default(now())
   updateAt   DateTime @updatedAt()
-  files File[]
+
 }
 
 model File {
-  pkValue String @id @default(uuid())
-  pkName String 
-  fileName String? 
-  filePath String? 
-  userId String 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
+  fileName String  @unique
+  filePath String @unique 
 }

@@ -18,11 +18,13 @@ export class UserController {
     ) {}
 
   @Post()
+  @NotLogin()
   create(@Body() createUserDto: UserDto) {  
     return this.userService.createUser(createUserDto);
   }
  
   @Post('/send/email/captcha')
+  @NotLogin()
   async sendEmailCaptcha(@Body() emailInfo: {email: string}){
       if(!emailInfo) {
         throw R.error('邮箱不能为空');

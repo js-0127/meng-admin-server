@@ -33,7 +33,7 @@ export class UserDto {
     password: string
 
     @ApiProperty({ description: '头像', nullable:true })
-    avatar?: Avatar
+    avatar?: string
 
     @ApiProperty({ description: '性别(0:女, 1:男)', nullable:true })
     sex?: number;

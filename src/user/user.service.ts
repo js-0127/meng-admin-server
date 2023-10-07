@@ -13,7 +13,6 @@ import { EmailService } from 'src/services/mail.service';
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly upload: UploadService,
     @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
     private readonly emailService: EmailService
     ){}
@@ -45,9 +44,6 @@ export class UserService {
             where,
             skip,
             take,
-            include: {
-              files: true,
-            },
           }),
           this.prisma.user.count({ where }),
         ]);
@@ -74,20 +70,9 @@ export class UserService {
         id: id,
         ...omit(createUserDto, ['emailCaptcha']),
         password: await hash(password),
-        avatar: createUserDto.avatar?.pkValue ? createUserDto.avatar?.pkValue : undefined
+        sex: +createUserDto.sex
       }
      })
-     if(createUserDto.avatar){
-      await this.prisma.file.updateMany({
-        where: {
-          userId: '37103725877133312'
-        },
-        data: {
-          userId: id,
-          pkValue: id
-        }
-      })
-     }
       this.emailService.sendEmail({
       to: createUserDto.email,
       subject: 'meng-admin平台账号创建成功',
@@ -101,39 +86,34 @@ export class UserService {
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
     //根据用户id查询文件表
-    const fileRecord = await this.prisma.file.findFirst({
+    const user = await this.prisma.user.findFirst({
      where: {
-      userId: id
+      id
      }
     })
+    const fileRecord = user.avatar
     //查到文件，如果头像是空,将原来文件删除
     if(fileRecord && !updateUserDto.avatar) {
       await this.prisma.file.delete({
-        where: {
-          pkValue: fileRecord.pkValue
-        }
+     where: {
+      filePath: fileRecord
+     }
       })
-    } else if(fileRecord && updateUserDto.avatar && fileRecord.pkValue !== updateUserDto.avatar.pkValue) {
-       //如果查到文件，并且有当前头像，但是文件的头像id不等于传过来的文件id
-       //删除原来的文件
-       //把当前用户id更新到新文件中
-       await this.prisma.file.delete({
-        where: {
-          pkValue: fileRecord.pkValue,
-        },
-      });
-  
-      await this.prisma.file.create({
+    } else if(fileRecord && updateUserDto.avatar && fileRecord !== updateUserDto.avatar) {
+      await this.prisma.file.update({
+         where: {
+          filePath: fileRecord
+         },
         data: {
-          ...updateUserDto.avatar,
-          userId: id,
+          filePath: updateUserDto.avatar,
+          fileName: undefined
         },
       });
     } else if(!fileRecord && updateUserDto.avatar) {
      const user = await this.prisma.file.create({
         data: {
-         ...omit(updateUserDto.avatar, ['pkValue']),
-         userId: id,
+            fileName: 'user_avatar',
+            filePath: updateUserDto.avatar
         }
       })
     }
@@ -143,8 +123,6 @@ export class UserService {
       },
       data: {
           ...updateUserDto,
-          avatar: updateUserDto?.avatar?.pkValue ? updateUserDto.avatar.pkValue : '', 
-          files: undefined
       }
     })
   }
