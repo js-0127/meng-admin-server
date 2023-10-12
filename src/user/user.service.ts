@@ -19,11 +19,14 @@ export class UserService {
 
 
     async findUserById(id: string){
-        return await this.prisma.user.findUnique({
+        const user = await this.prisma.user.findUnique({
           where: {
             id
           }
         })
+        
+        const menus = await this.prisma.menu.findMany()
+        return Object.assign(user, {menus})
     }
    
   async findByPage(parma: { page: string | number; size: string | number; nickName?: string; phoneNumber?: string; }){
@@ -61,10 +64,10 @@ export class UserService {
     const id = snowFlake.nextId().toString()
     const password = '123456'
 
-    const emailCaptcha = await this.redisClient.get(`emailCaptcha:${createUserDto.email}`)
-    if(emailCaptcha !== createUserDto.emailCaptcha){
-      throw R.error('邮箱验证码错误或失效')
-    } 
+    // const emailCaptcha = await this.redisClient.get(`emailCaptcha:${createUserDto.email}`)
+    // if(emailCaptcha !== createUserDto.emailCaptcha){
+    //   throw R.error('邮箱验证码错误或失效')
+    // } 
      await this.prisma.user.create({
       data: {
         id: id,
@@ -85,8 +88,10 @@ export class UserService {
      })
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
+    console.log(updateUserDto);
+    
     //根据用户id查询文件表
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.user.findUnique({
      where: {
       id
      }
@@ -99,7 +104,7 @@ export class UserService {
       filePath: fileRecord
      }
       })
-    } else if(fileRecord && updateUserDto.avatar && fileRecord !== updateUserDto.avatar) {
+    } else if(fileRecord && updateUserDto.avatar) {
       await this.prisma.file.update({
          where: {
           filePath: fileRecord
@@ -109,20 +114,13 @@ export class UserService {
           fileName: undefined
         },
       });
-    } else if(!fileRecord && updateUserDto.avatar) {
-     const user = await this.prisma.file.create({
-        data: {
-            fileName: 'user_avatar',
-            filePath: updateUserDto.avatar
-        }
-      })
-    }
+    } 
     return  await this.prisma.user.update({
       where: {
         id
       },
       data: {
-          ...updateUserDto,
+        ...omit(updateUserDto, ['emailCaptcha'])
       }
     })
   }

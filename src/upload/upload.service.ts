@@ -17,8 +17,8 @@ export class UploadService {
     const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1e10)}_${file.originalname}`;
            // 上传文件到minio服务器
           const fileEntity = await this.createFile(fileName)
-          const data =  await this.minioClient.putObject(this.bucketName, fileName, file.buffer)
-          return data;
+          await this.minioClient.putObject(this.bucketName, fileName, file.buffer)
+          return fileEntity;
   }
   async createFile(fileName: string){
     const fileInfo = await this.prisma.$transaction(async(prisma) => {
@@ -26,7 +26,7 @@ export class UploadService {
       const fileEntity = await prisma.file.create({
         data: {
           fileName: fileName,
-          filePath: `/${this.bucketName}/${fileName}`,
+          filePath: `/upload/${this.bucketName}/${fileName}`,
         }
       })
       return fileEntity

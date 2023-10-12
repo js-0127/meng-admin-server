@@ -11,21 +11,56 @@ datasource db {
 }
 
 model User {
-  id       String @id 
-  userName String @unique
-  nickName String 
-  password String
-  phoneNumber String @unique
-  email String @unique
-  avatar String?
-  sex Int?
-  createdAt  DateTime @default(now())
-  updateAt   DateTime @updatedAt()
-
+  id          String   @id
+  userName    String   @unique
+  nickName    String
+  password    String
+  phoneNumber String   @unique
+  email       String   @unique
+  avatar      String?
+  sex         Int?
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt()
+  roles       Role[]
 }
 
 model File {
-  id String @id @default(uuid())
-  fileName String  @unique
-  filePath String @unique 
+  id       String @id @default(uuid())
+  fileName String
+  filePath String @unique
+}
+
+model Role {
+  id        Int         @id @default(autoincrement())
+  name      String
+  code      Int
+  createdAt   DateTime @default(now())
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+  Role_Menu Role_Menu[]
+}
+
+model Menu {
+  id        Int         @id @default(autoincrement())
+  name      String?
+  parentId Int?
+  icon String?
+  type Int
+  route String?
+  filePath String?
+  orderNumber Int?
+  url String?
+  show Boolean?
+  authCode String?
+  Role_Menu Role_Menu[]
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt()
+}
+model Role_Menu {
+  id     Int  @id @default(autoincrement())
+  roleId Int
+  menuId Int
+  role   Role @relation(fields: [roleId], references: [id])
+  menu   Menu @relation(fields: [menuId], references: [id])
+  @@unique([roleId, menuId])
 }
