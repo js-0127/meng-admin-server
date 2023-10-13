@@ -3,6 +3,7 @@ import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { PrismaService } from 'src/services/prisma.service';
 import { R } from 'src/utils/common/error';
+import { pageDto } from './dto/page.dto';
 
 @Injectable()
 export class MenuService {
@@ -24,14 +25,66 @@ export class MenuService {
         ...createMenuDto,
         type: +createMenuDto.type,
         orderNumber: +createMenuDto.orderNumber,
-        show: Boolean(createMenuDto.show)
+        show: Boolean(createMenuDto.show),
+        parentId: +createMenuDto.parentId
       }
      })
   }
 
-  findAll() {
-    return `This action returns all menu`;
+  async findByPage(query:pageDto) {
+    const page = +query.page ? +query.page : 1
+         const skip = (page - 1) * (+query.size)
+         const take = +query.size
+         const where = {
+          route: {
+            contains: query.route || undefined
+          }
+        };
+        const [data, total] = await Promise.all([
+          this.prisma.menu.findMany({
+            where,
+            skip,
+            take,
+          }),
+          this.prisma.menu.count({ where }),
+        ]);
+        if (!data.length) return { data: [], total: 0 };
+        
+        const ids = data.map((o) => o.id);
+        console.log(ids);
+        
+        const countMap = await this.prisma.menu.groupBy({
+          by: 'parentId',
+          _count: {
+            id: true
+          },
+        
+        })
+        
+        console.log(countMap);
+        
+        // return countMap
+        const result = data.map((item) => {
+          const count = countMap.find((o) => o.parentId === item.id)?._count.id || 0;
+
+          
+          
+          return {
+              ...item,
+              hasChild: Number(count) > 0
+          }
+        })
+
+        return {
+          data: result,
+          total
+        }
   }
+
+  async getChildren(parentId: number){
+           
+  }
+
 
   findOne(id: number) {
     return `This action returns a #${id} menu`;
@@ -46,12 +99,17 @@ export class MenuService {
         ...updateMenuDto,
         type: +updateMenuDto.type,
         show: Boolean(updateMenuDto.show),
-        orderNumber: +updateMenuDto.orderNumber
+        orderNumber: +updateMenuDto.orderNumber,
+        parentId: +updateMenuDto.parentId
       }
      })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} menu`;
+  async remove(id: number) {
+        await this.prisma.menu.delete({
+          where: {
+            id
+          }
+        })
   }
 }
