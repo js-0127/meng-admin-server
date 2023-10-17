@@ -88,7 +88,6 @@ export class UserService {
      })
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
-    console.log(updateUserDto);
     
     //根据用户id查询文件表
     const user = await this.prisma.user.findUnique({

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put,Param, Delete, Query } from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -10,7 +10,7 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
   
   @NotLogin()
-  @Post()
+  @Post('create')
   async create(@Body() createMenuDto: CreateMenuDto) {
     return this.menuService.create(createMenuDto);
   }
@@ -20,24 +20,26 @@ export class MenuController {
     return this.menuService.findByPage(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.menuService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.menuService.findOne(+id);
+  // }
   
   @Get('children')
-  async getChildren(@Param('parentId') parentId:string ) {
+  async getChildren(@Query('parentId') parentId:string ) {
+    console.log(parentId);
+    
       return this.menuService.getChildren(+parentId)
   }
 
   @NotLogin()
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMenuDto: UpdateMenuDto) {
+  @Put('update:id')
+  update(@Body('id') id: string ,@Body() updateMenuDto: UpdateMenuDto) {
     return this.menuService.update(+id, updateMenuDto);
   }
   
   @NotLogin()
-  @Delete(':id')
+  @Delete('delete:id')
   async remove(@Param('id') id: string) {
     return this.menuService.remove(+id);
   }

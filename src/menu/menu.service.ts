@@ -50,9 +50,6 @@ export class MenuService {
         ]);
         if (!data.length) return { data: [], total: 0 };
         
-        const ids = data.map((o) => o.id);
-        console.log(ids);
-        
         const countMap = await this.prisma.menu.groupBy({
           by: 'parentId',
           _count: {
@@ -61,20 +58,16 @@ export class MenuService {
         
         })
         
-        console.log(countMap);
-        
-        // return countMap
-        const result = data.map((item) => {
+        const newArr = data.filter((item) => !item.parentId)
+        const result = newArr.map((item) => {
           const count = countMap.find((o) => o.parentId === item.id)?._count.id || 0;
-
-          
           
           return {
               ...item,
               hasChild: Number(count) > 0
           }
         })
-
+        
         return {
           data: result,
           total
@@ -82,8 +75,37 @@ export class MenuService {
   }
 
   async getChildren(parentId: number){
-           
-  }
+           if(!parentId){
+            throw R.validateError('父节点id不能为空')
+           }
+
+           const data = await this.prisma.menu.findMany({
+            where: {
+              parentId,
+            },
+            orderBy: {
+              orderNumber: 'asc'
+            }
+           })
+
+           if(!data.length) return []
+           const countMap = await this.prisma.menu.groupBy({
+            by: 'parentId',
+            _count: {
+              id: true
+            },
+          })
+
+          const result = data.map((item) => {
+            const count = countMap.find((o) => o.parentId === item.id)?._count.id || 0;
+            return {
+              ...item,
+              hasChild: Number(count) > 0
+          }
+          })
+          
+          return result
+        }
 
 
   findOne(id: number) {

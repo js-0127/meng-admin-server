@@ -9,4 +9,5 @@ export class CreateMenuDto {
     url?: string
     authCode?: string
     show?: boolean
+    filePath?: string
 }
