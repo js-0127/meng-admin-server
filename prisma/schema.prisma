@@ -21,46 +21,49 @@ model User {
   sex         Int?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt()
-  roles       Role[]
+  // roles       Role[]
 }
 
 model File {
   id       String @id @default(uuid())
   fileName String
   filePath String @unique
+  createdAt DateTime @default(now())
 }
 
 model Role {
-  id        Int         @id @default(autoincrement())
+  id        String        @id @default(uuid())
   name      String
-  code      Int
-  createdAt   DateTime @default(now())
-  userId String
-  user   User @relation(fields: [userId], references: [id])
+  code      String      @unique
+  createdAt DateTime    @default(now())
+  // userId String
+  // user   User @relation(fields: [userId], references: [id])
   Role_Menu Role_Menu[]
 }
 
 model Menu {
-  id        Int         @id @default(autoincrement())
-  name      String?
-  parentId Int?
-  icon String?
-  type Int
-  route String?
-  filePath String?
+  id          String         @id @default(uuid())
+  name        String?
+  parentId    String?
+  icon        String?
+  type        Int
+  route       String?
+  filePath    String?
   orderNumber Int?
-  url String?
-  show Boolean?
-  authCode String?
-  Role_Menu Role_Menu[]
-  createdAt   DateTime @default(now())
-  updateAt    DateTime @updatedAt()
+  url         String?
+  show        Boolean?
+  authCode    String?
+  Role_Menu   Role_Menu[]
+  createdAt   DateTime    @default(now())
+  updateAt    DateTime    @updatedAt()
 }
+
 model Role_Menu {
-  id     Int  @id @default(autoincrement())
-  roleId Int
-  menuId Int
+  id     String  @id @default(uuid())
+  roleId String
+  menuId String
   role   Role @relation(fields: [roleId], references: [id])
   menu   Menu @relation(fields: [menuId], references: [id])
+
   @@unique([roleId, menuId])
 }

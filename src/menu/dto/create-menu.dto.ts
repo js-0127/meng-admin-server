@@ -2,7 +2,7 @@
 export class CreateMenuDto {
     icon: string
     name: string
-    parentId: number
+    parentId: string
     type: number
     route: string
     orderNumber?:number

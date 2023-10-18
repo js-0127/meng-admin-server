@@ -1,34 +1,43 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { NotLogin } from 'src/common/decorator/not-login.decorator';
+import { RolePageDto } from './dto/role.page.dto';
 
 @Controller('role')
 export class RoleController {
-  constructor(private readonly roleService: RoleService) {}
+  constructor(
+    private readonly roleService: RoleService
+    ) {}
 
   @Post()
-  create(@Body() createRoleDto: CreateRoleDto) {
+  @NotLogin()
+  async create(@Body() createRoleDto: CreateRoleDto) {
     return this.roleService.create(createRoleDto);
   }
 
-  @Get()
-  findAll() {
-    return this.roleService.findAll();
+  @Get('page')
+  @NotLogin()
+  async getRoleListByPage(@Query() query: RolePageDto) {
+    return this.roleService.getRoleListByPage(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roleService.findOne(+id);
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.roleService.findOne(+id);
+  // }
+
+  @Put()
+  updateRole(@Body('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+    console.log(updateRoleDto);
+    
+    return this.roleService.updateRole(id, updateRoleDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(+id, updateRoleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roleService.remove(+id);
+  @Delete('delete')
+  @NotLogin()
+  async removeRole(@Query('id') id: string) {
+    return  this.roleService.removeRole(id);
   }
 }

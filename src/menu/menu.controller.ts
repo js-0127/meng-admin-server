@@ -29,18 +29,18 @@ export class MenuController {
   async getChildren(@Query('parentId') parentId:string ) {
     console.log(parentId);
     
-      return this.menuService.getChildren(+parentId)
+      return this.menuService.getChildren(parentId)
   }
 
   @NotLogin()
-  @Put('update:id')
+  @Put('update')
   update(@Body('id') id: string ,@Body() updateMenuDto: UpdateMenuDto) {
-    return this.menuService.update(+id, updateMenuDto);
+    return this.menuService.update(id, updateMenuDto);
   }
   
   @NotLogin()
-  @Delete('delete:id')
+  @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.menuService.remove(+id);
+    return this.menuService.remove(id);
   }
 }

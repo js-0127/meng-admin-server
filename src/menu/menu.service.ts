@@ -4,6 +4,7 @@ import { UpdateMenuDto } from './dto/update-menu.dto';
 import { PrismaService } from 'src/services/prisma.service';
 import { R } from 'src/utils/common/error';
 import { pageDto } from './dto/page.dto';
+import { omit } from 'lodash';
 
 @Injectable()
 export class MenuService {
@@ -26,7 +27,7 @@ export class MenuService {
         type: +createMenuDto.type,
         orderNumber: +createMenuDto.orderNumber,
         show: Boolean(createMenuDto.show),
-        parentId: +createMenuDto.parentId
+        parentId: createMenuDto.parentId
       }
      })
   }
@@ -74,7 +75,7 @@ export class MenuService {
         }
   }
 
-  async getChildren(parentId: number){
+  async getChildren(parentId: string){
            if(!parentId){
             throw R.validateError('父节点id不能为空')
            }
@@ -108,11 +109,13 @@ export class MenuService {
         }
 
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} menu`;
   }
 
-  async update(id: number, updateMenuDto: UpdateMenuDto) {
+  async update(id: string, updateMenuDto: UpdateMenuDto) {
+
+    updateMenuDto = omit(updateMenuDto, ['id', 'hasChild', 'children'])
      return await this.prisma.menu.update({
       where: {
         id
@@ -122,12 +125,12 @@ export class MenuService {
         type: +updateMenuDto.type,
         show: Boolean(updateMenuDto.show),
         orderNumber: +updateMenuDto.orderNumber,
-        parentId: +updateMenuDto.parentId
+        parentId: updateMenuDto.parentId
       }
      })
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
         await this.prisma.menu.delete({
           where: {
             id
