@@ -25,6 +25,12 @@ export class MenuController {
   //   return this.menuService.findOne(+id);
   // }
   
+ @Get()
+ async findAllMenus() {
+      return this.menuService.findAllMenus()
+ }
+
+
   @Get('children')
   async getChildren(@Query('parentId') parentId:string ) {
     console.log(parentId);

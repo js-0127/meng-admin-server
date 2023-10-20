@@ -1,11 +1,10 @@
 import {  Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma.service';
 import { UserDto } from './dto/user.dto';
-import { hash, verify } from 'argon2';
+import { hash } from 'argon2';
 import { UpdateUserDto } from './dto/update_user.dto';
 import { omit} from 'lodash'
 import { snowFlake } from 'src/utils/common/snow-flake';
-import { UploadService } from 'src/upload/upload.service';
 import { RedisClientType } from 'redis';
 import { R } from 'src/utils/common/error';
 import { EmailService } from 'src/services/mail.service';
@@ -64,18 +63,34 @@ export class UserService {
     const id = snowFlake.nextId().toString()
     const password = '123456'
 
-    // const emailCaptcha = await this.redisClient.get(`emailCaptcha:${createUserDto.email}`)
-    // if(emailCaptcha !== createUserDto.emailCaptcha){
-    //   throw R.error('邮箱验证码错误或失效')
-    // } 
-     await this.prisma.user.create({
-      data: {
-        id: id,
-        ...omit(createUserDto, ['emailCaptcha']),
-        password: await hash(password),
-        sex: +createUserDto.sex
-      }
-     })
+    const emailCaptcha = await this.redisClient.get(`emailCaptcha:${createUserDto.email}`)
+    if(emailCaptcha !== createUserDto.emailCaptcha){
+      throw R.error('邮箱验证码错误或失效')
+    } 
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.user.create({
+        data: {
+          id: id,
+          ...omit(createUserDto, ['emailCaptcha', 'roleIds']),
+          password: await hash(password),
+          sex: +createUserDto.sex
+        }
+       })
+
+      const roleIdMap = createUserDto.roleIds.map( (roleId) => {
+         return  prisma.user_Role.create({
+          data: {
+            userId: id,
+            roleId 
+          }
+         })
+        
+      })
+      await Promise.all(roleIdMap)
+      
+      return roleIdMap
+
+    })
       this.emailService.sendEmail({
       to: createUserDto.email,
       subject: 'meng-admin平台账号创建成功',

@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import {  
   AcceptLanguageResolver,
   I18nModule,
@@ -42,11 +42,6 @@ import { RoleModule } from './role/role.module';
       provide: APP_INTERCEPTOR,
       useClass: AuthInterceptor,
     }
-    
-  //  {
-  //   provide: 'APP_FILTER',
-  //   useClass: ValidateExceptionFilter
-  //  }
   ],
 })
 

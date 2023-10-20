@@ -32,6 +32,11 @@ export class MenuService {
      })
   }
 
+   async findAllMenus(){
+    return await this.prisma.menu.findMany()
+   }
+
+
   async findByPage(query:pageDto) {
     const page = +query.page ? +query.page : 1
          const skip = (page - 1) * (+query.size)

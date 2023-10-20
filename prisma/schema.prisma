@@ -21,7 +21,7 @@ model User {
   sex         Int?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt()
-  // roles       Role[]
+  user_Role   User_Role[]
 }
 
 model File {
@@ -36,11 +36,9 @@ model Role {
   name      String
   code      String      @unique
   createdAt DateTime    @default(now())
-  // userId String
-  // user   User @relation(fields: [userId], references: [id])
   Role_Menu Role_Menu[]
+  User_Role User_Role[]
 }
-
 model Menu {
   id          String         @id @default(uuid())
   name        String?
@@ -64,6 +62,15 @@ model Role_Menu {
   menuId String
   role   Role @relation(fields: [roleId], references: [id])
   menu   Menu @relation(fields: [menuId], references: [id])
-
   @@unique([roleId, menuId])
+}
+
+model User_Role {
+  id String @id @default(uuid())
+  roleId String
+  role   Role @relation(fields: [roleId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([roleId, userId])
 }
