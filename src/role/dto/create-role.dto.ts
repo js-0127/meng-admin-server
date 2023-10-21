@@ -6,5 +6,5 @@ export class CreateRoleDto {
     @IsNotEmpty({message: '角色代码不能为空'})
     code: string
 
-    menusId: string[]
+    menuIds: string[]
 }

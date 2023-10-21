@@ -21,7 +21,7 @@ model User {
   sex         Int?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt()
-  user_Role   User_Role[]
+  user_Role   User_Role[] 
 }
 
 model File {

@@ -38,5 +38,5 @@ export class UserDto {
     @ApiProperty({ description: '性别(0:女, 1:男)', nullable:true })
     sex?: number;
 
-    roleIds?: string[]
+    user_Role?: string[]
 }

@@ -16,10 +16,18 @@ export class RoleService {
   async getAllRoles(){
    return await this.prisma.role.findMany()
     }
+ 
+  async getSingleRole(id:string){
+    return await this.prisma.role.findUnique({
+      where: {
+        id
+      }
+    })
+  }
 
-  async create(createRoleDto: CreateRoleDto) {
-    console.log(createRoleDto);
-    
+
+  async create(createRoleDto: CreateRoleDto) {   
+     
       const count = await this.prisma.role.count({
         where: {
           code: createRoleDto.code
@@ -30,26 +38,30 @@ export class RoleService {
         throw R.error('代码不能重复')
       }
 
-     const role = await this.prisma.role.create({
-        data: {
-          name: createRoleDto.name,
-          code: createRoleDto.code
-        }
-      })
+    
 
       return await this.prisma.$transaction(async (prisma) => {
-        const roleMenus = await Promise.all(createRoleDto.menusId.map(async (menuId) => {
-          const roleMenu = await prisma.role_Menu.create({
+        
+        const role = await prisma.role.create({
+          data: {
+            name: createRoleDto.name,
+            code: createRoleDto.code
+          }
+        })
+        
+       const roleMenus = createRoleDto.menuIds.map((menuId) => {
+        console.log(menuId);
+        
+          return prisma.role_Menu.create({
             data: {
               menuId: menuId,
               roleId: role.id
             }
           })
-          return roleMenu
-        }))
-        return roleMenus
+        })
+       await Promise.all(roleMenus)
+       
       })
-      
   
   }
   async getRoleListByPage(rolePageDto: RolePageDto){
@@ -82,12 +94,14 @@ export class RoleService {
   }
 
  async getMenusByRoleId(roleId: string){
+  console.log(roleId);
+  
   const curRoleMenus = await this.prisma.role_Menu.findMany({
     where: {
       roleId
     }
   })
-  console.log(curRoleMenus);
+  console.log(curRoleMenus.map((o) => o.menuId));
   
   return curRoleMenus.map((o) => o.menuId)
  }
@@ -140,16 +154,16 @@ export class RoleService {
           ...updateRoleDto
         }
       })
-      if(Array.isArray(updateRoleDto.menusId)){
+      if(Array.isArray(updateRoleDto.menuIds)){
         const existingRoleMenus = await prisma.role_Menu.findMany({
           where: {
             roleId: id
           }
         })
         const existingMenuIds = existingRoleMenus.map(roleMenu => roleMenu.menuId)
-        const newMenuIds = updateRoleDto.menusId.filter(menuId => !existingMenuIds.includes(menuId))
+        const newMenuIds = updateRoleDto.menuIds.filter(menuId => !existingMenuIds.includes(menuId))
         
-        const roleMenusToDelete = existingRoleMenus.filter(roleMenu => !updateRoleDto.menusId.includes(roleMenu.menuId))
+        const roleMenusToDelete = existingRoleMenus.filter(roleMenu => !updateRoleDto.menuIds.includes(roleMenu.menuId))
         const roleMenusToCreate = newMenuIds.map(menuId => {
           return prisma.role_Menu.create({
             data: {
@@ -170,10 +184,6 @@ export class RoleService {
       return role
     })
   }
-
-
-
-
 
 
    async removeRole(id: string) {

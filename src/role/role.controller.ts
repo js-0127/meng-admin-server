@@ -30,27 +30,26 @@ export class RoleController {
     return this.roleService.getRoleListByPage(query);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.roleService.findOne(+id);
-  // }
+  @Get(':id')
+  @NotLogin()
+  getSingleRole(@Param('id') id: string) {
+    return this.roleService.getSingleRole(id);
+  }
 
   @Put()
   async updateRole(@Body('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.updateRole(id, updateRoleDto);
   }
 
-  @Delete('delete')
+  @Delete(':id')
   @NotLogin()
-  async removeRole(@Query('id') id: string) {
+  async removeRole(@Param('id') id: string) {
     return this.roleService.removeRole(id);
   }
 
-  @Get('menu/list')
+  @Get('menu/list/:roleId')
   @NotLogin()
-  async getRoleMenus(@Query('roleId') roleId: string) {
-    console.log(roleId);
-    
+  async getRoleMenus(@Param('roleId') roleId: string) {
      return this.roleService.getMenusByRoleId(roleId)
   }
 

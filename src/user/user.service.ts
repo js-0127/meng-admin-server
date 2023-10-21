@@ -24,7 +24,32 @@ export class UserService {
           }
         })
         
-        const menus = await this.prisma.menu.findMany()
+        const userRole = await this.prisma.user_Role.findMany(
+          {
+            where: {
+              userId: id
+            }
+          }
+        )
+        console.log(userRole);
+        
+        const menuIds = await this.prisma.role_Menu.findMany({
+          where: {
+            roleId: {
+              in : userRole.map((role) => role.roleId)
+            }
+          }
+        })
+        
+        const menus = await this.prisma.menu.findMany({
+          where: {
+            id: {
+              in : menuIds.map((menu) => menu.menuId)
+            }
+          }
+        })
+        // const menus = await this.prisma.menu.findMany()
+
         return Object.assign(user, {menus})
     }
    
@@ -46,13 +71,21 @@ export class UserService {
             where,
             skip,
             take,
+            include: {
+              user_Role: true
+            }
           }),
           this.prisma.user.count({ where }),
+
         ]);
          
         let newData = [];
          data.forEach((item) => {item = Object.assign(omit(item, ['password', 'updateAt'])); newData.push(item);
         })
+          newData.map((item) => {
+            item.user_Role = item.user_Role.map((item) => item.roleId)
+         })
+         
         return {
           data: newData,
           total
@@ -71,13 +104,13 @@ export class UserService {
       await prisma.user.create({
         data: {
           id: id,
-          ...omit(createUserDto, ['emailCaptcha', 'roleIds']),
+          ...omit(createUserDto, ['emailCaptcha', 'user_Role' ]),
           password: await hash(password),
           sex: +createUserDto.sex
         }
        })
 
-      const roleIdMap = createUserDto.roleIds.map( (roleId) => {
+      const roleIdMap = createUserDto.user_Role.map( (roleId) => {
          return  prisma.user_Role.create({
           data: {
             userId: id,
@@ -103,7 +136,6 @@ export class UserService {
      })
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
-    
     //根据用户id查询文件表
     const user = await this.prisma.user.findUnique({
      where: {
@@ -129,13 +161,51 @@ export class UserService {
         },
       });
     } 
-    return  await this.prisma.user.update({
+    
+    const userRole = await this.prisma.user_Role.findMany({
       where: {
-        id
-      },
-      data: {
-        ...omit(updateUserDto, ['emailCaptcha'])
+        userId: id
       }
+    })
+     
+    const oldRole = userRole.map((o) => o.roleId)
+    const newRole = updateUserDto.user_Role
+     
+    console.log(newRole);
+    
+    //要删除的id
+    const userRoleToDelete = oldRole.filter((item) => !newRole.includes(item))
+    //要添加的id
+    const userRoleToCreate = newRole.filter((item) => !oldRole.includes(item))
+    return await this.prisma.$transaction(async(prisma) => {
+    
+      
+      const createRoleMap = userRoleToCreate.map((roleId) => {
+        return prisma.user_Role.create({
+          data: {
+            roleId,
+            userId: id
+          }
+        })
+      })
+      const deleteRoleMap = await prisma.user_Role.deleteMany({
+        where: {
+          roleId: {
+            in: userRoleToDelete
+          }
+        }
+      })
+      await Promise.all(createRoleMap)
+
+      await prisma.user.update({
+        where: {
+          id
+        },
+        data: {
+          ...omit(updateUserDto, ['emailCaptcha', 'user_Role'])
+        }
+      })
+
     })
   }
 

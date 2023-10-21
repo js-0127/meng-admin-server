@@ -48,7 +48,7 @@ export class UserController {
             subject: 'meng-admin平台邮箱检验提醒'
       })
   }
-  @Get('page')
+  @Get('list')
   @NotLogin()
   findByPage(@Query() query: pageDto) {
     
@@ -56,6 +56,7 @@ export class UserController {
   }
 
   @Put()
+  @NotLogin()
   update(@Body('id') id:string, @Body() body:UpdateUserDto){
     return this.userService.updateUser(id, body)
   }
