@@ -1,4 +1,4 @@
-import {  Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { hash } from 'argon2';
@@ -8,12 +8,15 @@ import { snowFlake } from 'src/utils/common/snow-flake';
 import { RedisClientType } from 'redis';
 import { R } from 'src/utils/common/error';
 import { EmailService } from 'src/services/mail.service';
+import { SocketService } from 'src/socket/socket.service';
+import { SocketMessageType } from 'src/socket/message';
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly socketService: SocketService
     ){}
 
 
@@ -48,7 +51,6 @@ export class UserService {
             }
           }
         })
-        // const menus = await this.prisma.menu.findMany()
 
         return Object.assign(user, {menus})
     }
@@ -170,9 +172,24 @@ export class UserService {
      
     const oldRole = userRole.map((o) => o.roleId)
     const newRole = updateUserDto.user_Role
+     //判断用户分配角色有无变化，有的话，发消息给前端
      
-    console.log(newRole);
-    
+     if(oldRole.length !== newRole.length){
+      this.socketService.sendMessage(id, {
+        type: SocketMessageType.PermissionChange
+      })
+     }
+
+     //若数量相等，再看是否菜单一致，若是一致排序应该没问题,然后转化为字符串比较,因为数组如果地址不同，就算值相等，也会出错
+     const oldRoleSortId = oldRole.sort()
+     const newRoleSortId = newRole.sort()
+     
+     if(oldRoleSortId.join('') !== newRoleSortId.join('')){
+      this.socketService.sendMessage(id, {
+        type: SocketMessageType.PermissionChange
+      })
+     }
+
     //要删除的id
     const userRoleToDelete = oldRole.filter((item) => !newRole.includes(item))
     //要添加的id

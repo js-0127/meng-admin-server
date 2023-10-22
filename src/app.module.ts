@@ -22,6 +22,7 @@ import { UploadModule } from './upload/upload.module';
 import { EmailService } from './services/mail.service';
 import { MenuModule } from './menu/menu.module';
 import { RoleModule } from './role/role.module';
+import { SocketModule } from './socket/socket.module';
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
@@ -35,9 +36,10 @@ import { RoleModule } from './role/role.module';
     ],
   }), AuthModule, ConfigModule.forRoot({
     isGlobal: true
-  }), CacheModule, UploadModule, MenuModule, RoleModule],
+  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule],
   controllers: [AppController],
-  providers: [AppService, PrismaService, LoggerService, ConfigService, EmailService,
+  providers: [
+    AppService, PrismaService, LoggerService, ConfigService, EmailService,
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthInterceptor,

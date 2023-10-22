@@ -15,7 +15,8 @@ import {Request} from 'express'
 import { EmailService } from 'src/services/mail.service';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { RsaService } from 'src/services/rsa.service';
-
+import { SocketService } from 'src/socket/socket.service';
+import { SocketMessageType } from 'src/socket/message';
 @Injectable() 
 export class AuthService {
    //保存验证码
@@ -27,7 +28,8 @@ export class AuthService {
     private readonly config: ConfigService,
    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
    private readonly EmailService: EmailService,
-   private readonly RsaService: RsaService
+   private readonly RsaService: RsaService,
+   private readonly socketService: SocketService
     ) {}
   /**
    * @description 返回验证码
@@ -243,7 +245,7 @@ export class AuthService {
 
            await this.prisma.$transaction(async(prisma) => {
               const hashPassword = await hash(password)
-              await this.prisma.user.updateMany({
+              await prisma.user.updateMany({
                 where: {
                   email: resetPasswordDto.email
                 },
@@ -257,6 +259,11 @@ export class AuthService {
                 ...refreshToken.map((refreshToken) => this.redisClient.del(`refreshToken:${refreshToken}`)),
                 this.redisClient.del(`resetPasswordEmailCapthca:${resetPasswordDto.email}`)
               ])
+             
+            this.socketService.sendMessage(user.id, {
+              type: SocketMessageType.PasswordChange
+            })
+           
            })
         }
 }

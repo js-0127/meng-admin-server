@@ -6,11 +6,14 @@ import { R } from 'src/utils/common/error';
 import { RolePageDto } from './dto/role.page.dto';
 import { omit } from 'lodash';
 import { SetRoleMenuDto } from './dto/set-role-menu.dto';
+import { SocketService } from 'src/socket/socket.service';
+import { SocketMessageType } from 'src/socket/message';
 
 @Injectable()
 export class RoleService {
     constructor(
-      private readonly prisma: PrismaService
+      private readonly prisma: PrismaService,
+      private readonly socketService:SocketService
     ){}
 
   async getAllRoles(){
@@ -24,10 +27,7 @@ export class RoleService {
       }
     })
   }
-
-
   async create(createRoleDto: CreateRoleDto) {   
-     
       const count = await this.prisma.role.count({
         where: {
           code: createRoleDto.code
@@ -37,8 +37,6 @@ export class RoleService {
       if(count) {
         throw R.error('代码不能重复')
       }
-
-    
 
       return await this.prisma.$transaction(async (prisma) => {
         
@@ -120,6 +118,48 @@ export class RoleService {
     const existingMenuIds = curRoleMenus.map(roleMenu => roleMenu.menuId)
     const newMenuIds = checkedKeys.filter(menuId => !existingMenuIds.includes(menuId))
     const roleMenusToDelete = curRoleMenus.filter(roleMenu => !checkedKeys.includes(roleMenu.menuId))
+   
+
+     //跟用户改角色一样,先浅比较一下
+     if(existingMenuIds.length !== newMenuIds.length) {
+      //查到所有分配了该角色的用户发消息
+
+      const userIds = (await this.prisma.user_Role.findMany({
+        where: {
+          roleId
+        }
+      })).map((userRole) =>userRole.userId)
+      
+      userIds.forEach((userId) => {
+         this.socketService.sendMessage(userId, {
+          type: SocketMessageType.PermissionChange
+         })
+      })
+     }
+
+     //再深比较
+
+     const oldMenuSortId = existingMenuIds.sort()
+     const newMenuSortId = newMenuIds.sort()
+
+     if(oldMenuSortId.join('') !== newMenuSortId.join('')){
+      //查到所有分配了该角色的用户发消息
+
+      const userIds = (await this.prisma.user_Role.findMany({
+        where: {
+          roleId
+        }
+      })).map((userRole) =>userRole.userId)
+      
+      userIds.forEach((userId) => {
+         this.socketService.sendMessage(userId, {
+          type: SocketMessageType.PermissionChange
+         })
+      })
+     }
+
+
+
 
     const roleMenusToCreate = newMenuIds.map((menuId) => {
           return prisma.role_Menu.create({
@@ -163,7 +203,46 @@ export class RoleService {
         const existingMenuIds = existingRoleMenus.map(roleMenu => roleMenu.menuId)
         const newMenuIds = updateRoleDto.menuIds.filter(menuId => !existingMenuIds.includes(menuId))
         
+       //跟用户改角色一样,先浅比较一下
+       if(existingMenuIds.length !== newMenuIds.length) {
+        //查到所有分配了该角色的用户发消息
+
+        const userIds = (await this.prisma.user_Role.findMany({
+          where: {
+            roleId:id
+          }
+        })).map((userRole) =>userRole.userId)
+        
+        userIds.forEach((userId) => {
+           this.socketService.sendMessage(userId, {
+            type: SocketMessageType.PermissionChange
+           })
+        })
+       }
+
+       //再深比较
+
+       const oldMenuSortId = existingMenuIds.sort()
+       const newMenuSortId = newMenuIds.sort()
+
+       if(oldMenuSortId.join('') !== newMenuSortId.join('')){
+        //查到所有分配了该角色的用户发消息
+
+        const userIds = (await this.prisma.user_Role.findMany({
+          where: {
+            roleId:id
+          }
+        })).map((userRole) =>userRole.userId)
+        
+        userIds.forEach((userId) => {
+           this.socketService.sendMessage(userId, {
+            type: SocketMessageType.PermissionChange
+           })
+        })
+       }
+
         const roleMenusToDelete = existingRoleMenus.filter(roleMenu => !updateRoleDto.menuIds.includes(roleMenu.menuId))
+
         const roleMenusToCreate = newMenuIds.map(menuId => {
           return prisma.role_Menu.create({
             data: {
