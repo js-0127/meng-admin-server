@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useWebSocketAdapter(new WsAdapter(app));
   app.setGlobalPrefix('api')
   app.useGlobalPipes(new ValidationPipe());
-  
+  app.enableCors()
   const config = new DocumentBuilder()
   .setTitle('Meng Admin') 
   .setDescription('Meng Admin的后台接口')

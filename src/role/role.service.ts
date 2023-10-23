@@ -48,7 +48,6 @@ export class RoleService {
         })
         
        const roleMenus = createRoleDto.menuIds.map((menuId) => {
-        console.log(menuId);
         
           return prisma.role_Menu.create({
             data: {
@@ -92,14 +91,12 @@ export class RoleService {
   }
 
  async getMenusByRoleId(roleId: string){
-  console.log(roleId);
   
   const curRoleMenus = await this.prisma.role_Menu.findMany({
     where: {
       roleId
     }
   })
-  console.log(curRoleMenus.map((o) => o.menuId));
   
   return curRoleMenus.map((o) => o.menuId)
  }

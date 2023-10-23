@@ -34,8 +34,7 @@ export class UserService {
             }
           }
         )
-        console.log(userRole);
-        
+
         const menuIds = await this.prisma.role_Menu.findMany({
           where: {
             roleId: {

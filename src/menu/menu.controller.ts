@@ -32,9 +32,7 @@ export class MenuController {
 
 
   @Get('children')
-  async getChildren(@Query('parentId') parentId:string ) {
-    console.log(parentId);
-    
+  async getChildren(@Query('parentId') parentId:string ) {    
       return this.menuService.getChildren(parentId)
   }
 
