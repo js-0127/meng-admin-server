@@ -13,7 +13,7 @@ import { pageDto } from './dto/page.dto';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+    @Inject('DEFAULT') private readonly redisClient: RedisClientType,
     private readonly emailService: EmailService         
     ) {}
 

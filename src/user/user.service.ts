@@ -8,19 +8,20 @@ import { snowFlake } from 'src/utils/common/snow-flake';
 import { RedisClientType } from 'redis';
 import { R } from 'src/utils/common/error';
 import { EmailService } from 'src/services/mail.service';
-import { SocketService } from 'src/socket/socket.service';
-import { SocketMessageType } from 'src/socket/message';
+import { SocketGateway } from 'src/socket/socket.gateway';
+import { SocketMessageType } from 'src/socket/interface/message';
+
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+    @Inject('DEFAULT') private readonly redisClient: RedisClientType,
     private readonly emailService: EmailService,
-    private readonly socketService: SocketService
+    private readonly socketGateway: SocketGateway
     ){}
 
-
     async findUserById(id: string){
+      
         const user = await this.prisma.user.findUnique({
           where: {
             id
@@ -34,7 +35,7 @@ export class UserService {
             }
           }
         )
-
+        
         const menuIds = await this.prisma.role_Menu.findMany({
           where: {
             roleId: {
@@ -174,9 +175,9 @@ export class UserService {
      //判断用户分配角色有无变化，有的话，发消息给前端
      
      if(oldRole.length !== newRole.length){
-      this.socketService.sendMessage(id, {
+      this.socketGateway.sendMessage(id, ({
         type: SocketMessageType.PermissionChange
-      })
+      }))
      }
 
      //若数量相等，再看是否菜单一致，若是一致排序应该没问题,然后转化为字符串比较,因为数组如果地址不同，就算值相等，也会出错
@@ -184,9 +185,7 @@ export class UserService {
      const newRoleSortId = newRole.sort()
      
      if(oldRoleSortId.join('') !== newRoleSortId.join('')){
-      this.socketService.sendMessage(id, {
-        type: SocketMessageType.PermissionChange
-      })
+      
      }
 
     //要删除的id

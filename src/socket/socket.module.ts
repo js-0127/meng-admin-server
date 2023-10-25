@@ -1,12 +1,9 @@
-import { Global, Module } from '@nestjs/common';
-import { SocketService } from './socket.service';
-import { SocketGateway } from './socket.gateway';
-import { CacheModule } from 'src/cache/cache.module';
+import { Module } from '@nestjs/common';
 
-@Global()
+import { SocketGateway } from './socket.gateway';
+
 @Module({
-  imports: [CacheModule],
-  providers: [SocketGateway, SocketService],
-  exports: [SocketService]
+  providers: [SocketGateway],
+  exports: [SocketGateway]
 })
 export class SocketModule {}

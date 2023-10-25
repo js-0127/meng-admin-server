@@ -11,10 +11,6 @@ export enum SocketMessageType {
      * token过期
      */
     TokenExpire = 'TokenExpire',
-
-    Ping = 'Ping',
-
-    Pong = 'Pong'
   }
   
   export class SocketMessage<T = any> {

@@ -6,14 +6,15 @@ import { R } from 'src/utils/common/error';
 import { RolePageDto } from './dto/role.page.dto';
 import { omit } from 'lodash';
 import { SetRoleMenuDto } from './dto/set-role-menu.dto';
-import { SocketService } from 'src/socket/socket.service';
-import { SocketMessageType } from 'src/socket/message';
+import { SocketGateway } from 'src/socket/socket.gateway';
+import { SocketMessageType } from 'src/socket/interface/message';
+
 
 @Injectable()
 export class RoleService {
     constructor(
       private readonly prisma: PrismaService,
-      private readonly socketService:SocketService
+      private readonly socketGateway: SocketGateway
     ){}
 
   async getAllRoles(){
@@ -103,6 +104,7 @@ export class RoleService {
 
 
  async setRoleMenu(setRoleMenuDto: SetRoleMenuDto) {
+  
   const {checkedKeys, roleId} = setRoleMenuDto
 
   return await this.prisma.$transaction(async (prisma) => {
@@ -128,11 +130,11 @@ export class RoleService {
       })).map((userRole) =>userRole.userId)
       
       userIds.forEach((userId) => {
-         this.socketService.sendMessage(userId, {
+        this.socketGateway.sendMessage(userId, {
           type: SocketMessageType.PermissionChange
-         })
+        })
       })
-     }
+      
 
      //再深比较
 
@@ -149,16 +151,16 @@ export class RoleService {
       })).map((userRole) =>userRole.userId)
       
       userIds.forEach((userId) => {
-         this.socketService.sendMessage(userId, {
+        this.socketGateway.sendMessage(userId, {
           type: SocketMessageType.PermissionChange
-         })
+        })
       })
+      
      }
 
-
-
-
     const roleMenusToCreate = newMenuIds.map((menuId) => {
+      console.log(menuId);
+      
           return prisma.role_Menu.create({
             data: {
               roleId,
@@ -175,6 +177,7 @@ export class RoleService {
       }
     })
     await Promise.all(roleMenusToCreate)
+  }
   })
  }
  
@@ -210,11 +213,7 @@ export class RoleService {
           }
         })).map((userRole) =>userRole.userId)
         
-        userIds.forEach((userId) => {
-           this.socketService.sendMessage(userId, {
-            type: SocketMessageType.PermissionChange
-           })
-        })
+       
        }
 
        //再深比较
@@ -231,11 +230,7 @@ export class RoleService {
           }
         })).map((userRole) =>userRole.userId)
         
-        userIds.forEach((userId) => {
-           this.socketService.sendMessage(userId, {
-            type: SocketMessageType.PermissionChange
-           })
-        })
+       
        }
 
         const roleMenusToDelete = existingRoleMenus.filter(roleMenu => !updateRoleDto.menuIds.includes(roleMenu.menuId))

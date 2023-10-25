@@ -4,19 +4,50 @@ import { createClient } from 'redis';
 @Global()
 @Module({
    providers:[{
-    provide: 'REDIS_CLIENT',
+    provide: 'DEFAULT',
     async useFactory(){
       const client = createClient({
         socket: {
-          host: process.env.RD_HOST,
-          port: parseInt(process.env.RD_PORT),
+          host: 'localhost',
+          port: 6379,
         },
+        database: 0
       })
       await client.connect();
       return client;
+    },
+  },
+  {
+    provide: 'PUBLISH',
+    async useFactory(){
+      const client = createClient({
+        socket: {
+          host: 'localhost',
+          port: 6379,
+        },
+        database: 1
+      })
+      await client.connect()
+      return client;
     }
-  }],
-  exports: ['REDIS_CLIENT']
+  },
+  {
+    provide: 'SUBSCRIBE',
+    async useFactory(){
+      const client = createClient({
+        socket: {
+          host: 'localhost',
+          port: 6379,
+        },
+        database: 2
+      })
+      await client.connect()
+      return client;
+    }
+  }
+
+],
+  exports: ['DEFAULT', 'PUBLISH', 'SUBSCRIBE']
 }, 
 
 )

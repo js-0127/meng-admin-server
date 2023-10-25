@@ -1,5 +1,6 @@
 import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
 import { RedisClientType } from 'redis';
 import { Observable } from 'rxjs';
 import { R } from 'src/utils/common/error';
@@ -7,7 +8,7 @@ import { R } from 'src/utils/common/error';
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
   constructor(
-    @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+    @Inject('DEFAULT') private readonly redisClient: RedisClientType,
      private readonly reflector: Reflector
   ){}
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
@@ -35,6 +36,7 @@ export class AuthInterceptor implements NestInterceptor {
     const userInfo = JSON.parse(userInfoStr)
     req['userInfo'] = userInfo
     req['token'] = token 
+
     return next.handle();
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Inject, Injectable, Post, Req } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CaptchaType, LoginDto } from './dto/login.dto';
 import * as svgCaptcha from 'svg-captcha';
 import { PrismaService } from 'src/services/prisma.service';
@@ -15,21 +15,23 @@ import {Request} from 'express'
 import { EmailService } from 'src/services/mail.service';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { RsaService } from 'src/services/rsa.service';
-import { SocketService } from 'src/socket/socket.service';
-import { SocketMessageType } from 'src/socket/message';
+import { SocketGateway } from 'src/socket/socket.gateway';
+import { SocketMessageType } from 'src/socket/interface/message';
+
 @Injectable() 
 export class AuthService {
    //保存验证码
   private captchas: Map<string, CaptchaType> = new Map();
   public validaeCaptcha: CaptchaType;
   
+  
   constructor(
     private readonly prisma:PrismaService,
     private readonly config: ConfigService,
-   @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+   @Inject('DEFAULT') private readonly redisClient: RedisClientType,
    private readonly EmailService: EmailService,
    private readonly RsaService: RsaService,
-   private readonly socketService: SocketService
+   private readonly socketGateway: SocketGateway
     ) {}
   /**
    * @description 返回验证码
@@ -260,7 +262,7 @@ export class AuthService {
                 this.redisClient.del(`resetPasswordEmailCapthca:${resetPasswordDto.email}`)
               ])
              
-            this.socketService.sendMessage(user.id, {
+            this.socketGateway.sendMessage(user.id, {
               type: SocketMessageType.PasswordChange
             })
            

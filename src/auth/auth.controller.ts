@@ -56,7 +56,6 @@ export class AuthController {
 
   //获取用户信息
   @Get('current/user')
-  //@ts-ignore
   async getCurrentUser(@Req() req:Request) : Promise<UserVo> {
      let user = await this.userService.findUserById(req['userInfo'].userId)
      return user

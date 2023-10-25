@@ -7,7 +7,7 @@ import { R } from "src/utils/common/error";
 @Injectable()
 export class RsaService {
   
- constructor(@Inject('REDIS_CLIENT') readonly redisClient: RedisClientType ){}
+ constructor(@Inject('DEFAULT') readonly redisClient: RedisClientType ){}
     //获取公钥
     public async getPublicKey(): Promise<string>{
       const key = new NodeRSA({b: 512});

@@ -7,12 +7,13 @@ import { UserModule } from 'src/user/user.module';
 import { UserService } from 'src/user/user.service';
 import { EmailService } from 'src/services/mail.service';
 import { RsaService } from 'src/services/rsa.service';
-import { SocketService } from 'src/socket/socket.service';
+import { SocketModule } from 'src/socket/socket.module';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 
 @Module({
   imports: [CacheModule, UserModule],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, UserService, EmailService, RsaService, SocketService],
+  providers: [AuthService, PrismaService, UserService, EmailService, RsaService, SocketGateway],
 })
 export class AuthModule {}
