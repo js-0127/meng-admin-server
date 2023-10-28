@@ -21,6 +21,7 @@ export class RoleController {
   @Get()
   @NotLogin()
   async getAllRoles(){
+
     return this.roleService.getAllRoles()
   }
 

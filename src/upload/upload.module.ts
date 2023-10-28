@@ -10,7 +10,7 @@ import { PrismaService } from 'src/services/prisma.service';
     NestMinioModule.register(
       {
       isGlobal: true,
-      endPoint: 'localhost',
+      endPoint: 'my-minio',
       port: 9000,
       useSSL: false,
       accessKey: 'minio',

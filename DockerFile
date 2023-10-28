@@ -1,17 +1,36 @@
-# 使用 Node.js 14 作为基础镜像
-FROM node:18
+# Dockerfile
+# 因为我们项目使用的是pnpm安装依赖，所以找了个支持pnpm的基础镜像，如果你们使用npm，这里可以替换成node镜像
+# FROM nginx:alpine
+FROM gplane/pnpm:8 as builder
 
-# 在容器中创建一个新的目录来存储应用程序文件
+# 设置时区
+ENV TZ=Asia/Shanghai \
+  DEBIAN_FRONTEND=noninteractive
+RUN ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata && rm -rf /var/lib/apt/lists/*
+
+# 创建工作目录
+RUN mkdir -p /app
+
+# 指定工作目录
 WORKDIR /app
 
-# 将所有应用程序文件复制到容器中
-COPY . .
+# 复制当前代码到/app工作目录
+COPY . ./
 
-# 安装依赖项
-RUN npm install
+RUN npm config set registry https://registry.npm.taobao.org/
+# npm 安装依赖
+COPY package.json /app/package.json
+RUN rm -rf /app/package-lock.json
+RUN cd /app && rm -rf /app/node_modules &&  pnpm install
 
-# 将端口 3000 暴露出来
+# 打包
+RUN cd /app && rm -rf /app/dist &&  pnpm run build
+
+# 启动服务
+# "start:prod": "cross-env NODE_ENV=production node ./dist/src/main.js",
+CMD pnpm run start:prod
+
 EXPOSE 3000
 
-# 在容器中运行应用程序
-CMD ["npm", "start"]
+
+

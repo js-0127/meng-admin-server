@@ -8,7 +8,7 @@ import { createClient } from 'redis';
     async useFactory(){
       const client = createClient({
         socket: {
-          host: 'localhost',
+          host: 'meng-admin-server-redis-1',
           port: 6379,
         },
         database: 0
@@ -22,7 +22,7 @@ import { createClient } from 'redis';
     async useFactory(){
       const client = createClient({
         socket: {
-          host: 'localhost',
+          host: 'meng-admin-server-redis-1',
           port: 6379,
         },
         database: 1
@@ -36,7 +36,7 @@ import { createClient } from 'redis';
     async useFactory(){
       const client = createClient({
         socket: {
-          host: 'localhost',
+          host: 'meng-admin-server-redis-1',
           port: 6379,
         },
         database: 2

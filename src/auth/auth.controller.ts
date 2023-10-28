@@ -22,8 +22,8 @@ export class AuthController {
   @ApiOperation({
     summary: '登录',
   })
-  async login(@Body() loginDto:LoginDto){
-     return this.authService.login(loginDto)
+  async login(@Body() loginDto:LoginDto, @Req() req:Request){
+     return this.authService.login(loginDto, req)
   }
   
   @Get('captcha')

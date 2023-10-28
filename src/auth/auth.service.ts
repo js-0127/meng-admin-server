@@ -17,13 +17,13 @@ import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { RsaService } from 'src/services/rsa.service';
 import { SocketGateway } from 'src/socket/socket.gateway';
 import { SocketMessageType } from 'src/socket/interface/message';
+import { getAdressByIp, getIp, getUserAgent } from 'src/utils/common/ip';
 
 @Injectable() 
 export class AuthService {
    //保存验证码
   private captchas: Map<string, CaptchaType> = new Map();
   public validaeCaptcha: CaptchaType;
-  
   
   constructor(
     private readonly prisma:PrismaService,
@@ -74,8 +74,16 @@ export class AuthService {
    * @returns {*} token,refreshtoken
    * @memberof AuthService
    */
-  public async login(loginDto: LoginDto): Promise<TokenVO> {
-    //验证是否有这个用户
+  public async login(loginDto: LoginDto, req:Request): Promise<TokenVO> {
+
+    const ip = getIp(req)
+    const address = getAdressByIp(ip)
+    const browser = getUserAgent(req).family
+    const os = getUserAgent(req).os.toString()
+    const userName = loginDto.accountNumber
+
+    try {
+      //验证是否有这个用户
     const user  = await this.prisma.user.findUnique({
       where: {
         userName: loginDto.accountNumber
@@ -103,9 +111,23 @@ export class AuthService {
       throw R.error('验证码错误')
     }
     
+    const status = true
+    const message = '成功'
+
+    await this.prisma.login_Log.create({
+      data: {
+        ip,
+        address,
+        browser,
+        os,
+        userName,
+        status,
+        message
+      }
+    })
+
     const expire = this.config.get<number>('EXPIRE')
     const refreshExpire = this.config.get<number>('REFRESHEXPIRE')
-
     const token = uuid()
     const refreshToken = uuid()
 
@@ -124,6 +146,22 @@ export class AuthService {
       refreshExpire,
       refreshToken,
     } as TokenVO;
+
+    } catch (error){
+        const status = false
+        const message = error?.message || '登录失败'
+         this.prisma.login_Log.create({
+          data: {
+             ip,
+             os,
+             address,
+             browser,
+             userName,
+             status,
+             message
+          }
+        })
+    }
 } 
 
    //刷新token

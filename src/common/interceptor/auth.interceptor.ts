@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { RedisClientType } from 'redis';
 import { Observable } from 'rxjs';
 import { R } from 'src/utils/common/error';
+import { getIp } from 'src/utils/common/ip';
 
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
@@ -16,9 +17,11 @@ export class AuthInterceptor implements NestInterceptor {
     const req = context.switchToHttp().getRequest<Request>()
 
     const isNotLogin = this.reflector.get<string[]>('not-login', context.getHandler())
+
     if(isNotLogin){
       return next.handle()
     }
+   
    
     
     const token = req.headers['authorization']?.replace('Bearer ', '')
@@ -36,7 +39,7 @@ export class AuthInterceptor implements NestInterceptor {
     const userInfo = JSON.parse(userInfoStr)
     req['userInfo'] = userInfo
     req['token'] = token 
-
+    
     return next.handle();
   }
 }

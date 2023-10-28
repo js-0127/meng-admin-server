@@ -23,6 +23,7 @@ import { EmailService } from './services/mail.service';
 import { MenuModule } from './menu/menu.module';
 import { RoleModule } from './role/role.module';
 import { SocketModule } from './socket/socket.module';
+import { LoginLogModule } from './login-log/login-log.module';
 
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
@@ -37,7 +38,7 @@ import { SocketModule } from './socket/socket.module';
     ],
   }), AuthModule, ConfigModule.forRoot({
     isGlobal: true
-  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule],
+  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule],
   controllers: [AppController],
   providers: [
     AppService, PrismaService, LoggerService, ConfigService, EmailService, 

@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import {MINIO_CONNECTION} from 'nestjs-minio'
 import {Client} from 'minio'
 import { PrismaService } from 'src/services/prisma.service';
-import { snowFlake } from 'src/utils/common/snow-flake';
 
 @Injectable()
 export class UploadService {
@@ -22,7 +21,6 @@ export class UploadService {
   }
   async createFile(fileName: string){
     const fileInfo = await this.prisma.$transaction(async(prisma) => {
-      const id = snowFlake.nextId()
       const fileEntity = await prisma.file.create({
         data: {
           fileName: fileName,
