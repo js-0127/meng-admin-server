@@ -25,11 +25,20 @@ export class UploadService {
         data: {
           fileName: fileName,
           filePath: `/upload/${this.bucketName}/${fileName}`,
+          userId: null
         }
       })
       return fileEntity
     })
     return fileInfo;
+
+
+  }
+
+
+  deleteData(){
+    return this.prisma.file.deleteMany({
+    })
   }
   }
 

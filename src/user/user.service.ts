@@ -51,8 +51,15 @@ export class UserService {
             }
           }
         })
-
-        return Object.assign(user, {menus})
+        
+        const fileEntity = await this.prisma.file.findMany({
+          where: {
+            userId:id
+          }
+        })
+        console.log(fileEntity);
+        
+        return Object.assign(user, {menus,fileEntity})
     }
    
   async findByPage(parma: { page: string | number; size: string | number; nickName?: string; phoneNumber?: string; }){
@@ -74,20 +81,32 @@ export class UserService {
             skip,
             take,
             include: {
-              user_Role: true
+              user_Role: true,
             }
           }),
           this.prisma.user.count({ where }),
 
         ]);
          
+        const fileEntitys = await this.prisma.file.findMany()
+       
+        console.log(fileEntitys);
+        
         let newData = [];
          data.forEach((item) => {item = Object.assign(omit(item, ['password', 'updateAt'])); newData.push(item);
         })
           newData.map((item) => {
             item.user_Role = item.user_Role.map((item) => item.roleId)
          })
-         
+        
+         newData.map((item) => {
+           item.fileEntity = Object.assign(fileEntitys.filter((fileEntity) => fileEntity.userId === item.id))
+           
+           
+         })
+
+
+
         return {
           data: newData,
           total
@@ -103,23 +122,31 @@ export class UserService {
       throw R.error('邮箱验证码错误或失效')
     } 
     await this.prisma.$transaction(async (prisma) => {
-      await prisma.user.create({
-        data: {
-          id: id,
-          ...omit(createUserDto, ['emailCaptcha', 'user_Role' ]),
-          password: await hash(password),
-          sex: +createUserDto.sex
-        }
-       })
-
-      const roleIdMap = createUserDto.user_Role.map( (roleId) => {
+       await Promise.all([
+        prisma.user.create({
+          data: {
+            id: id,
+            ...omit(createUserDto, ['emailCaptcha', 'user_Role' ]),
+            password: await hash(password),
+            sex: +createUserDto.sex
+          }
+         }),
+         prisma.file.updateMany({
+         where: {
+          filePath: createUserDto.avatar
+         },
+         data: {
+          userId: id
+         }
+         })
+       ])
+      const roleIdMap = createUserDto.user_Role.map((roleId) => {
          return  prisma.user_Role.create({
           data: {
             userId: id,
             roleId 
           }
          })
-        
       })
       await Promise.all(roleIdMap)
       
@@ -138,13 +165,15 @@ export class UserService {
      })
   }
   async updateUser(id:string, updateUserDto: UpdateUserDto){
+    
+    updateUserDto = Object.assign(omit(updateUserDto, ['fileEntity']))
     //根据用户id查询文件表
-    const user = await this.prisma.user.findUnique({
+    const fileEntity = await this.prisma.file.findFirst({
      where: {
-      id
+      userId: id
      }
     })
-    const fileRecord = user.avatar
+    const fileRecord = fileEntity?.filePath
     //查到文件，如果头像是空,将原来文件删除
     if(fileRecord && !updateUserDto.avatar) {
       await this.prisma.file.delete({
@@ -159,7 +188,8 @@ export class UserService {
          },
         data: {
           filePath: updateUserDto.avatar,
-          fileName: undefined
+          fileName: undefined,
+          userId: id
         },
       });
     } 
@@ -225,11 +255,25 @@ export class UserService {
   }
 
   async deleteUser( id:string){
-     return await this.prisma.user.delete({
-      where: {
-        id
-      }
-     })
+    await this.prisma.$transaction(async(prisma) => {
+       await Promise.all([
+        prisma.file.deleteMany({
+          where: {
+            userId:id
+          }
+        }),
+        prisma.user_Role.deleteMany({
+          where: {
+            userId: id
+          }
+        }),
+        prisma.user.delete({
+          where: {
+            id
+          }
+        })
+       ])
+    })
   }
 
 }

@@ -10,6 +10,7 @@ export class LoginLogService {
   ){}
 
  async getLoginLogByPage(loginLogDto:LoginLogDto) {
+   
    const {page, size, userName}  = loginLogDto
 
    const where = {

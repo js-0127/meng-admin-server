@@ -14,7 +14,7 @@ export class MenuController {
   async create(@Body() createMenuDto: CreateMenuDto) {
     return this.menuService.create(createMenuDto);
   }
-  @NotLogin()
+  
   @Get('page')
   async findByPage(@Query() query: pageDto) {
     return this.menuService.findByPage(query);
@@ -35,7 +35,7 @@ export class MenuController {
   async getChildren(@Query('parentId') parentId:string ) {    
       return this.menuService.getChildren(parentId)
   }
-
+  
   @NotLogin()
   @Put('update')
   update(@Body('id') id: string ,@Body() updateMenuDto: UpdateMenuDto) {
@@ -45,6 +45,7 @@ export class MenuController {
   @NotLogin()
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    console.log(id);
     return this.menuService.remove(id);
   }
 }

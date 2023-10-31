@@ -1,6 +1,6 @@
 import { Request } from "express";
 import IP2Region from "ip2region";
-import * as useragent  from 'useragent'
+import * as useragent from 'useragent';
 export const getIp = (req: Request) => {
 
     const ips = (req.headers['x-forwarded-for'] as string) ||

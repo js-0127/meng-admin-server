@@ -19,20 +19,17 @@ export class RoleController {
   }
   
   @Get()
-  @NotLogin()
   async getAllRoles(){
 
     return this.roleService.getAllRoles()
   }
 
   @Get('list')
-  @NotLogin()
   async getRoleListByPage(@Query() query: RolePageDto) {
     return this.roleService.getRoleListByPage(query);
   }
 
   @Get(':id')
-  @NotLogin()
   getSingleRole(@Param('id') id: string) {
     return this.roleService.getSingleRole(id);
   }
@@ -43,19 +40,17 @@ export class RoleController {
   }
 
   @Delete(':id')
-  @NotLogin()
   async removeRole(@Param('id') id: string) {
     return this.roleService.removeRole(id);
   }
 
   @Get('menu/list/:roleId')
-  @NotLogin()
   async getRoleMenus(@Param('roleId') roleId: string) {
      return this.roleService.getMenusByRoleId(roleId)
   }
-
-  @Post('alloc/menu') 
+  
   @NotLogin()
+  @Post('alloc/menu') 
   async setRoleMenus(@Body() setRoleMenuDto: SetRoleMenuDto) {
      return this.roleService.setRoleMenu(setRoleMenuDto)
   }

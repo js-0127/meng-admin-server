@@ -22,9 +22,9 @@ export class UserController {
   create(@Body() createUserDto: UserDto) {  
     return this.userService.createUser(createUserDto);
   }
- 
-  @Post('/send/email/captcha')
+  
   @NotLogin()
+  @Post('/send/email/captcha')
   async sendEmailCaptcha(@Body() emailInfo: {email: string}){
       if(!emailInfo) {
         throw R.error('邮箱不能为空');
@@ -49,9 +49,7 @@ export class UserController {
       })
   }
   @Get('list')
-  @NotLogin()
   findByPage(@Query() query: pageDto) {
-    
    return this.userService.findByPage(query)
   }
 

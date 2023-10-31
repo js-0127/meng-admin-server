@@ -18,6 +18,7 @@
 
     redis:
       image: redis:latest
+      container_name: my_redis_container
       ports:
           - "6379:6379"
       networks:
@@ -76,4 +77,3 @@
     mysql_data: 
     minio_data:
       driver: local
-

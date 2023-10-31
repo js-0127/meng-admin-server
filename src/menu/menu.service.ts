@@ -10,17 +10,17 @@ import { omit } from 'lodash';
 export class MenuService {
   constructor(private readonly prisma: PrismaService){}
   async create(createMenuDto: CreateMenuDto) {
-   
-    const menu = await this.prisma.menu.findFirst({
-      where: {
-        route: createMenuDto.route
+    if(createMenuDto.route){
+      const menu = await this.prisma.menu.findFirst({
+        where: {
+          route: createMenuDto.route
+        }
+      })
+      if(menu){
+        throw R.error('当前路由已存在');
+        
       }
-    })
-    if(menu){
-      throw R.error('当前路由已存在');
-      
     }
-
     return await this.prisma.menu.create({
       data: {
         ...createMenuDto,
@@ -136,10 +136,20 @@ export class MenuService {
   }
 
   async remove(id: string) {
-        await this.prisma.menu.delete({
+        await this.prisma.$transaction(async(prisma) => {
+         await Promise.all([
+          prisma.role_Menu.deleteMany({
+            where: {
+              menuId: id
+            }
+          }),
+          prisma.menu.delete({
           where: {
             id
-          }
+            }
+        }),
+       ])
         })
   }
+
 }

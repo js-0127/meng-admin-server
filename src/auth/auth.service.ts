@@ -148,19 +148,19 @@ export class AuthService {
     } as TokenVO;
 
     } catch (error){
-        const status = false
-        const message = error?.message || '登录失败'
-         this.prisma.login_Log.create({
-          data: {
-             ip,
-             os,
-             address,
-             browser,
-             userName,
-             status,
-             message
-          }
-        })
+        // const status = false
+        // const message = error?.message || '登录失败'
+        //  this.prisma.login_Log.create({
+        //   data: {
+        //      ip,
+        //      os,
+        //      address,
+        //      browser,
+        //      userName,
+        //      status,
+        //      message
+        //   }
+        // })
     }
 } 
 

@@ -21,14 +21,18 @@ model User {
   sex         Int?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt()
-  user_Role   User_Role[] 
+  user_Role   User_Role[]
+  
 }
 
 model File {
   id       String @id @default(uuid())
   fileName String
   filePath String @unique
+  userId String?
   createdAt DateTime @default(now())
+
+  @@unique([userId])
 }
 
 model Role {

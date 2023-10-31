@@ -1,5 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, NestApplication } from '@nestjs/core';
 import {  
   AcceptLanguageResolver,
   I18nModule,
@@ -24,6 +24,7 @@ import { MenuModule } from './menu/menu.module';
 import { RoleModule } from './role/role.module';
 import { SocketModule } from './socket/socket.module';
 import { LoginLogModule } from './login-log/login-log.module';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [UserModule, LoggerModule, I18nModule.forRoot({
@@ -38,10 +39,10 @@ import { LoginLogModule } from './login-log/login-log.module';
     ],
   }), AuthModule, ConfigModule.forRoot({
     isGlobal: true
-  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule],
+  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule, ApiModule],
   controllers: [AppController],
   providers: [
-    AppService, PrismaService, LoggerService, ConfigService, EmailService, 
+    AppService, PrismaService, LoggerService, ConfigService, EmailService,
     {
       provide: APP_INTERCEPTOR,
       useClass: AuthInterceptor,
