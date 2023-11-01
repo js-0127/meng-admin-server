@@ -25,9 +25,13 @@ import { RoleModule } from './role/role.module';
 import { SocketModule } from './socket/socket.module';
 import { LoginLogModule } from './login-log/login-log.module';
 import { ApiModule } from './api/api.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
-  imports: [UserModule, LoggerModule, I18nModule.forRoot({
+  imports: [
+    UserModule, 
+    LoggerModule, 
+    I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
     loaderOptions: {
       path: path.join(__dirname, '/i18n/'),
@@ -36,8 +40,20 @@ import { ApiModule } from './api/api.module';
     resolvers: [
       { use: QueryResolver, options: ['lang'] },
       AcceptLanguageResolver,
-    ],
-  }), AuthModule, ConfigModule.forRoot({
+    ]
+    }),
+    BullModule.forRoot({
+      
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'clearDirtyFile'
+    }),
+    AuthModule, 
+    ConfigModule.forRoot({
     isGlobal: true
   }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule, ApiModule],
   controllers: [AppController],

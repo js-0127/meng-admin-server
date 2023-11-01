@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { hash } from 'argon2';
@@ -51,13 +51,11 @@ export class UserService {
             }
           }
         })
-        
-        const fileEntity = await this.prisma.file.findMany({
-          where: {
-            userId:id
-          }
-        })
-        console.log(fileEntity);
+          const fileEntity = await this.prisma.file.findMany({
+            where: {
+              userId:id
+            }
+          })
         
         return Object.assign(user, {menus,fileEntity})
     }
@@ -90,7 +88,6 @@ export class UserService {
          
         const fileEntitys = await this.prisma.file.findMany()
        
-        console.log(fileEntitys);
         
         let newData = [];
          data.forEach((item) => {item = Object.assign(omit(item, ['password', 'updateAt'])); newData.push(item);
@@ -102,11 +99,7 @@ export class UserService {
          newData.map((item) => {
            item.fileEntity = Object.assign(fileEntitys.filter((fileEntity) => fileEntity.userId === item.id))
            
-           
          })
-
-
-
         return {
           data: newData,
           total
@@ -130,16 +123,20 @@ export class UserService {
             password: await hash(password),
             sex: +createUserDto.sex
           }
-         }),
-         prisma.file.updateMany({
-         where: {
-          filePath: createUserDto.avatar
-         },
-         data: {
-          userId: id
-         }
          })
        ])
+       if(createUserDto.avatar){
+        await Promise.all([
+          prisma.file.updateMany({
+            where: {
+             filePath: createUserDto.avatar
+            },
+            data: {
+             userId: id
+            }
+            })
+        ])
+       }
       const roleIdMap = createUserDto.user_Role.map((roleId) => {
          return  prisma.user_Role.create({
           data: {
@@ -174,17 +171,18 @@ export class UserService {
      }
     })
     const fileRecord = fileEntity?.filePath
+    
     //查到文件，如果头像是空,将原来文件删除
     if(fileRecord && !updateUserDto.avatar) {
       await this.prisma.file.delete({
      where: {
-      filePath: fileRecord
+      userId: id
      }
       })
     } else if(fileRecord && updateUserDto.avatar) {
       await this.prisma.file.update({
          where: {
-          filePath: fileRecord
+          userId: id
          },
         data: {
           filePath: updateUserDto.avatar,
@@ -192,6 +190,15 @@ export class UserService {
           userId: id
         },
       });
+    } else if(!fileRecord && updateUserDto.avatar) {
+      await this.prisma.file.updateMany({
+        where: {
+          filePath: updateUserDto.avatar
+        },
+        data: {
+          userId: id
+        }
+      })
     } 
     
     const userRole = await this.prisma.user_Role.findMany({

@@ -6,9 +6,6 @@ export const getIp = (req: Request) => {
     const ips = (req.headers['x-forwarded-for'] as string) ||
     (req.headers['X-Real-IP'] as string) ||
     (req.ip.replace('::ffff:', '') as string).replace(':ffff:', '')
-
-    console.log(ips.split(',')?.[0], 'ip');
-    
     return ips.split(',')?.[0];
     
 }

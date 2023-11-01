@@ -13,7 +13,7 @@ export class UploadService {
   }
 
   async uploadFile(file:Express.Multer.File){
-    const fileName = `${Date.now() + '-' + Math.round(Math.random() * 1e10)}_${file.originalname}`;
+    const fileName = `${new Date().getTime()}_${file.filename}`;;
            // 上传文件到minio服务器
           const fileEntity = await this.createFile(fileName)
           await this.minioClient.putObject(this.bucketName, fileName, file.buffer)
@@ -32,12 +32,24 @@ export class UploadService {
     })
     return fileInfo;
 
-
   }
 
 
-  deleteData(){
-    return this.prisma.file.deleteMany({
+ async clearEmptyUserIdFiles(){
+    const curDate = new Date();
+    curDate.setDate(curDate.getDate() - 1);
+   
+    const fileRecordToDelete = await this.prisma.file.findMany({
+      where: {
+        userId: null
+      }
+    })
+    await this.prisma.$transaction(async(prisma) => {
+       await Promise.all([
+        fileRecordToDelete.map(record => {
+          this.minioClient.removeObject(this.bucketName, record.fileName)
+        })
+       ])
     })
   }
   }

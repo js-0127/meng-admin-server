@@ -1,5 +1,5 @@
 
-export class CreateMenuDto {
+export class  CreateMenuDto {
     icon: string
     name: string
     parentId: string

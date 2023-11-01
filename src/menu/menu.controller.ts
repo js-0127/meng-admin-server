@@ -45,7 +45,6 @@ export class MenuController {
   @NotLogin()
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    console.log(id);
     return this.menuService.remove(id);
   }
 }

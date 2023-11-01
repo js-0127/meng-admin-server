@@ -13,15 +13,8 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
 
   async uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req:Request){   
-    console.log(file);
     
    return  await this.uploadService.uploadFile(file);
-  }
-
-  @Delete()
-  @NotLogin()
-  deleteData(){
-     return this.uploadService.deleteData();
   }
 
 }

@@ -159,7 +159,6 @@ export class RoleService {
      }
 
     const roleMenusToCreate = newMenuIds.map((menuId) => {
-          console.log(menuId);
           
           return prisma.role_Menu.create({
             data: {

@@ -24,10 +24,6 @@ export class MenuService {
     return await this.prisma.menu.create({
       data: {
         ...createMenuDto,
-        type: +createMenuDto.type,
-        orderNumber: +createMenuDto.orderNumber,
-        show: Boolean(createMenuDto.show),
-        parentId: createMenuDto.parentId
       }
      })
   }
