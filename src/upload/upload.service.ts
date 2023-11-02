@@ -2,13 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import {MINIO_CONNECTION} from 'nestjs-minio'
 import {Client} from 'minio'
 import { PrismaService } from 'src/services/prisma.service';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UploadService {
  private bucketName = 'meng-admin' 
   constructor(
     @Inject(MINIO_CONNECTION) private readonly minioClient: Client,
-    private prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {
   }
 
@@ -34,17 +35,14 @@ export class UploadService {
 
   }
 
-
+ @Cron('0 0 0 * * *')
  async clearEmptyUserIdFiles(){
-    const curDate = new Date();
-    curDate.setDate(curDate.getDate() - 1);
-   
     const fileRecordToDelete = await this.prisma.file.findMany({
       where: {
         userId: null
       }
     })
-    await this.prisma.$transaction(async(prisma) => {
+    await this.prisma.$transaction(async() => {
        await Promise.all([
         fileRecordToDelete.map(record => {
           this.minioClient.removeObject(this.bucketName, record.fileName)

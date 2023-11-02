@@ -25,8 +25,7 @@ import { RoleModule } from './role/role.module';
 import { SocketModule } from './socket/socket.module';
 import { LoginLogModule } from './login-log/login-log.module';
 import { ApiModule } from './api/api.module';
-import { BullModule } from '@nestjs/bull';
-
+import { ScheduleModule } from '@nestjs/schedule'
 @Module({
   imports: [
     UserModule, 
@@ -42,16 +41,7 @@ import { BullModule } from '@nestjs/bull';
       AcceptLanguageResolver,
     ]
     }),
-    BullModule.forRoot({
-      
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'clearDirtyFile'
-    }),
+    ScheduleModule.forRoot(),
     AuthModule, 
     ConfigModule.forRoot({
     isGlobal: true
