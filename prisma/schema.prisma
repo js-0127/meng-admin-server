@@ -27,8 +27,8 @@ model User {
 
 model File {
   id       String @id @default(uuid())
-  fileName String
-  filePath String @unique
+  fileName String 
+  filePath String  @unique
   userId String?
   createdAt DateTime @default(now())
 

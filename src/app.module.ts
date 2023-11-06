@@ -1,35 +1,31 @@
-import { Module, MiddlewareConsumer, NestModule, RequestMethod } from '@nestjs/common';
-import { APP_INTERCEPTOR, NestApplication } from '@nestjs/core';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import {ConfigModule, ConfigService}  from '@nestjs/config'
+import * as path  from 'path';
+import { ScheduleModule } from '@nestjs/schedule'
 import {  
   AcceptLanguageResolver,
   I18nModule,
   QueryResolver,
 } from 'nestjs-i18n'
+import { UserModule } from './module/user/user.module';
+import { AuthModule } from './module/auth/auth.module';
+import { MenuModule } from './module/menu/menu.module';
+import { RoleModule } from './module/role/role.module';
+import { SocketModule } from './socket/socket.module';
+import { LoginLogModule } from './module/login-log/login-log.module';
+import { CacheModule } from './module/cache/cache.module';
+import { UploadModule } from './module/upload/upload.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './services/prisma.service';
-import { UserModule } from './user/user.module';
-import { LoggerService } from './logger/logger.service';
-import * as path  from 'path';
-import { LoggerModule } from './logger/logger.module';
-import {LoggerMiddleware} from "./logger/logger.middleware";
-import { AuthModule } from './auth/auth.module';
-import { ValidateExceptionFilter } from './common/filter/validate.filter';
-import {ConfigModule, ConfigService}  from '@nestjs/config'
-import { CacheModule } from './cache/cache.module';
-import { AuthInterceptor } from './common/interceptor/auth.interceptor';
-import { UploadModule } from './upload/upload.module';
+import { LoggerService } from './services/logger.service';
 import { EmailService } from './services/mail.service';
-import { MenuModule } from './menu/menu.module';
-import { RoleModule } from './role/role.module';
-import { SocketModule } from './socket/socket.module';
-import { LoginLogModule } from './login-log/login-log.module';
-import { ApiModule } from './api/api.module';
-import { ScheduleModule } from '@nestjs/schedule'
+import {LoggerMiddleware} from "./common/middware/logger.middleware";
+import { AuthInterceptor } from './common/interceptor/auth.interceptor';
 @Module({
   imports: [
     UserModule, 
-    LoggerModule, 
     I18nModule.forRoot({
     fallbackLanguage: 'zh-CN',
     loaderOptions: {
@@ -45,7 +41,7 @@ import { ScheduleModule } from '@nestjs/schedule'
     AuthModule, 
     ConfigModule.forRoot({
     isGlobal: true
-  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule, ApiModule],
+  }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule],
   controllers: [AppController],
   providers: [
     AppService, PrismaService, LoggerService, ConfigService, EmailService,
@@ -55,7 +51,6 @@ import { ScheduleModule } from '@nestjs/schedule'
     }
   ],
 })
-
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*');

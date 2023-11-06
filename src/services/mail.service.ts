@@ -26,6 +26,11 @@ export class EmailService {
     this.transporter = nodemailer.createTransport(this.mailConfig);
   }
 
+  /**
+   * @description 发送邮箱
+   * @date 10/16/2023
+   * @param mailInfo 
+   */
   async sendEmail(mailInfo: MailInfo) {
      const info = await this.transporter.sendMail({
         from: this.mailConfig.auth.user, //发送方邮箱

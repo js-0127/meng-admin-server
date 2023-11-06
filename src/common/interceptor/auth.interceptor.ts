@@ -22,8 +22,6 @@ export class AuthInterceptor implements NestInterceptor {
       return next.handle()
     }
    
-   
-    
     const token = req.headers['authorization']?.replace('Bearer ', '')
     if(!token) {
       throw R.unauthorizedError('未授权')

@@ -1,10 +1,10 @@
-// websocket.gateway.ts
-import {  WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage } from '@nestjs/websockets';
-import { Server, WebSocket } from 'ws';
-import {IncomingMessage} from 'http'
-import { SocketMessage, SocketMessageType } from './interface/message';
+import { WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage } from '@nestjs/websockets';
 import { Inject } from '@nestjs/common';
+import {IncomingMessage} from 'http'
 import { RedisClientType } from 'redis';
+import { Server, WebSocket } from 'ws';
+import { SocketMessage, SocketMessageType } from './interface/message';
+
 @WebSocketGateway(3001, {
   cors: {
     origin: '*'
@@ -19,10 +19,21 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   constructor(
     @Inject('DEFAULT') private readonly RedisClient: RedisClientType
   ){}
-
+  
+  /**
+   * @description 连接时
+   * @date 10/20/2023
+   */
   afterInit() {
     this.server.emit('message');
   }
+
+  /**
+   * @description 处理连接的动作
+   * @date 10/20/2023
+   * @param socket 
+   * @param request 
+   */
   async handleConnection(socket: WebSocket, request:IncomingMessage) {
     const token = request.url.split('=').at(-1)
 
@@ -30,7 +41,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       socket.close()
       return
     }
-
     const userInfoStr = await this.RedisClient.get(`token:${token}`)
     if(!userInfoStr){
       this.server.clients.forEach((socket) => {
@@ -42,8 +52,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const userInfo = JSON.parse(userInfoStr)
     
     this.addConnect(userInfo.userId, socket)
-
-
     socket.on('message', (data) => {
       this.handleMessage(data.toString())
       
@@ -51,12 +59,18 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     
   }
 
+ /**
+  * @description 断开连接时
+  * @date 10/20/2023
+  * @param socket 
+  */
   handleDisconnect(socket: WebSocket) {
      this.deleteConnect(socket)
   }
 
   /**
-   * 添加连接
+   * @description 添加连接
+   * @date 10/20/2023
    * @param userId 用户id
    * @param connect 用户socket连接
    */
@@ -70,11 +84,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
  }
 
  /**
-   * 删除连接
+   * @description 删除连接
+   * @date 10/20/2023
    * @param connect 用户socket连接
    */
- 
-
  deleteConnect(connect: WebSocket) {
   const connects = [...this.connects.values()];
 
@@ -95,14 +108,20 @@ handleMessage(payload: string) {
   // ...
 }
 
-sendMessage<T>(userId: string, data: SocketMessage<T>) {
-  const sockets = this.connects.get(userId);
-  if (sockets?.length) {
-    sockets.forEach(socket => {
-      socket.send(JSON.stringify(data));
-    });
+  /**
+   * @description 发送消息
+   * @date 10/20/2023
+   * @param userId 
+   * @param data 
+   */
+  sendMessage<T>(userId: string, data: SocketMessage<T>) {
+    const sockets = this.connects.get(userId);
+    if (sockets?.length) {
+      sockets.forEach(socket => {
+        socket.send(JSON.stringify(data));
+      });
+    }
   }
-}
 }
 
 
