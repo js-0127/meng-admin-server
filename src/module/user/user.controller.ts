@@ -75,7 +75,7 @@ export class UserController {
     summary: '删除用户',
     description: '需要管理员权限'
   })
-  @RoleAuth('管理员')
+  // @RoleAuth('管理员')
   @Delete(':id')
   delete(@Param('id') id:string){
       return this.userService.deleteUser(id)

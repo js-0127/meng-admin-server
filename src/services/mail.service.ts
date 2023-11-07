@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 interface MailInfo {
     // 目标邮箱
@@ -13,27 +14,20 @@ interface MailInfo {
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
-  private mailConfig =  {
-    host: 'smtp.qq.com',
-    port: 465,
-    secure: true,
-    auth: {
-    user: '1374744754@qq.com',
-    pass: 'wdoqrjpmcambhjha'
-  }
-  }
-  constructor() {
-    this.transporter = nodemailer.createTransport(this.mailConfig);
+  constructor(
+    private readonly configService:ConfigService
+  ) {
+    this.transporter = nodemailer.createTransport(this.configService.get('mail'));
   }
 
-  /**
+  /**ConfigService
    * @description 发送邮箱
    * @date 10/16/2023
    * @param mailInfo 
    */
   async sendEmail(mailInfo: MailInfo) {
      const info = await this.transporter.sendMail({
-        from: this.mailConfig.auth.user, //发送方邮箱
+        from: this.configService.get('mail').auth.user, //发送方邮箱
         ...mailInfo
      })
      return info

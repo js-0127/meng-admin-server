@@ -174,7 +174,6 @@ export class UserService {
       `
      })
   }
-  
   /**
    * @description 更新用户
    * @date 10/03/2023
@@ -183,20 +182,34 @@ export class UserService {
    */
   async updateUser(id:string, updateUserDto: UpdateUserDto){
     updateUserDto = Object.assign(omit(updateUserDto, ['fileEntity','emailCaptcha']))
-    console.log(updateUserDto);
-  
    const fileEntity = await this.prisma.file.findFirst({
       where: {
           userId: id
        }
     }) 
-    if(fileEntity && !updateUserDto.avatar){
-      await this.prisma.file.deleteMany({
-        where: {
-          userId: id
-        }
-      })
-    } else if(!fileEntity && updateUserDto.avatar){
+
+    if(fileEntity && fileEntity.filePath != updateUserDto.avatar){
+      if(fileEntity && !updateUserDto.avatar){
+        await this.prisma.file.deleteMany({
+          where: {
+            userId: id
+          }
+        })
+      } 
+      else if(fileEntity && updateUserDto.avatar){
+        await this.prisma.file.updateMany({
+         where: {
+           userId: id
+         },
+         data: {
+          filePath: updateUserDto.avatar,
+          fileName: `${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`,
+          userId:id
+         }
+        })
+   } 
+    } 
+    else if(!fileEntity && updateUserDto.avatar){
       await this.prisma.file.create({
         data: {
          filePath: updateUserDto.avatar,
@@ -204,18 +217,8 @@ export class UserService {
          fileName: `${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`
         }
       })
-    } else if(fileEntity && updateUserDto.avatar){
-      await this.prisma.file.updateMany({
-       where: {
-         userId: id
-       },
-       data: {
-        filePath: updateUserDto.avatar,
-        fileName: `${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`,
-        userId:id
-       }
-   })
- } 
+    }
+    
     const userRole = await this.prisma.user_Role.findMany({
       where: {
         userId: id

@@ -125,8 +125,8 @@ export class AuthService {
       }
     })
 
-    const expire = this.config.get<number>('EXPIRE')
-    const refreshExpire = this.config.get<number>('REFRESHEXPIRE')
+    const expire:number = this.config.get('token').expire
+    const refreshExpire:number = this.config.get('token').refreshExpire
     const token = uuid()
     const refreshToken = uuid()
 
@@ -176,7 +176,7 @@ export class AuthService {
           if(!userId){
             throw R.error('刷新token失败')
           }
-          const expire = this.config.get<number>('EXPIRE')
+          const expire:number = this.config.get('token').expire
           const token = uuid()
 
           await this.redisClient
@@ -233,11 +233,11 @@ export class AuthService {
                }
             
                const emailCaptcha = generateRandomCode()
-
+               const mailCaptchaExpire = this.config.get('mailCaptchaExpire').expire
                await this.redisClient
                .multi()
                .set(`resetPasswordEmailCaptcha:${emailCaptcha}`, emailCaptcha)
-               .expire(`resetPasswordEmailCaptcha:${emailCaptcha}`, 60 * 30)
+               .expire(`resetPasswordEmailCaptcha:${emailCaptcha}`, mailCaptchaExpire)
                .exec()
                  
 

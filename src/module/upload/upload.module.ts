@@ -3,19 +3,18 @@ import { NestMinioModule } from 'nestjs-minio';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { PrismaService } from 'src/services/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({
   imports: [
-    NestMinioModule.register(
-      {
-      isGlobal: true,
-      endPoint: 'localhost',
-      port: 9000,
-      useSSL: false,
-      accessKey: 'minio',
-      secretKey: 'minio@123',
-    }),
+    NestMinioModule.registerAsync({
+      useFactory: (configService:ConfigService) => ({
+        ...configService.get('minio'),
+      }),
+      inject: [ConfigService],
+    })
+     
   ],
   controllers: [UploadController],
   providers: [UploadService, PrismaService],

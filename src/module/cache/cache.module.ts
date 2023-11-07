@@ -1,49 +1,41 @@
 import { Global, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient } from 'redis';
 
 @Global()
 @Module({
    providers:[{
     provide: 'DEFAULT',
-    async useFactory(){
+    async useFactory(configService: ConfigService){
       const client = createClient({
-        socket: {
-          host: 'localhost',
-          port: 6379,
-        },
-        database: 0
+      ...configService.get('redis')
       })
       await client.connect();
       return client;
     },
+    inject:[ConfigService]
   },
   {
     provide: 'PUBLISH',
-    async useFactory(){
+    async useFactory(configService: ConfigService){
       const client = createClient({
-        socket: {
-          host: 'localhost',
-          port: 6379,
-        },
-        database: 1
+        ...configService.get('publish')
       })
       await client.connect()
       return client;
-    }
+    },
+    inject:[ConfigService]
   },
   {
     provide: 'SUBSCRIBE',
-    async useFactory(){
+    async useFactory(configService: ConfigService){
       const client = createClient({
-        socket: {
-          host: 'localhost',
-          port: 6379,
-        },
-        database: 2
+       ...configService.get('subscribe')
       })
       await client.connect()
       return client;
-    }
+    },
+    inject:[ConfigService]
   }
 
 ],

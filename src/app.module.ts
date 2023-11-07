@@ -7,7 +7,8 @@ import {
   AcceptLanguageResolver,
   I18nModule,
   QueryResolver,
-} from 'nestjs-i18n'
+} from 'nestjs-i18n';
+import config from './config';
 import { UserModule } from './module/user/user.module';
 import { AuthModule } from './module/auth/auth.module';
 import { MenuModule } from './module/menu/menu.module';
@@ -23,6 +24,7 @@ import { LoggerService } from './services/logger.service';
 import { EmailService } from './services/mail.service';
 import {LoggerMiddleware} from "./common/middware/logger.middleware";
 import { AuthInterceptor } from './common/interceptor/auth.interceptor';
+
 @Module({
   imports: [
     UserModule, 
@@ -40,7 +42,8 @@ import { AuthInterceptor } from './common/interceptor/auth.interceptor';
     ScheduleModule.forRoot(),
     AuthModule, 
     ConfigModule.forRoot({
-    isGlobal: true
+    isGlobal: true,
+    load: [...config]
   }), CacheModule, UploadModule, MenuModule, RoleModule, SocketModule, LoginLogModule],
   controllers: [AppController],
   providers: [
