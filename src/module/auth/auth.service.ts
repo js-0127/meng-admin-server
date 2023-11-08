@@ -69,7 +69,6 @@ export class AuthService {
         userName
       }
     })
-
     
     if(!user) {
       console.log(user);
@@ -129,11 +128,9 @@ export class AuthService {
     } as TokenVO;
 
     } catch (error){
-      console.log(error);
-      
         const status = false
-        const message = error?.message || '登录失败'
-         this.prisma.login_Log.create({
+        const message = error?.response || '登录失败'
+        await this.prisma.login_Log.create({
           data: {
              ip,
              os,

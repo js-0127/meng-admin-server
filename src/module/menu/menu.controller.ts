@@ -5,7 +5,6 @@ import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
 import { pageDto } from './dto/page.dto';
 import { RoleAuth } from 'src/common/decorator/auth-role.decorator';
-import { NotLogin } from 'src/common/decorator/not-login.decorator';
 
 
 @Controller('menu')
@@ -41,7 +40,6 @@ export class MenuController {
     summary: '创建菜单'
   })
   @Post()
-  @NotLogin()
   async create(@Body() createMenuDto: CreateMenuDto) {
     return this.menuService.create(createMenuDto);
   }

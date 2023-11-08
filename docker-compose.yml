@@ -13,16 +13,16 @@
 
       volumes:
         - mysql_data:/var/lib/mysql
-      # networks:
-      #    - my_network  
+      networks:
+         - my_network  
 
     redis:
       image: redis:latest
       container_name: my_redis_container
       ports:
           - "6379:6379"
-      # networks:
-      #    - my_network   
+      networks:
+         - my_network   
 
     minio:
       image: bitnami/minio:latest
@@ -35,37 +35,37 @@
         MINIO_ROOT_PASSWORD: minio@123
       volumes:
         - 'minio_data:/bitnami/minio/data'
-      # networks:
-      #    - my_network      
+      networks:
+         - my_network      
 
-    # web: 
-    #   image: wev-client:1.0.0
-    #   container_name: my-web-app
-    #   environment:
-    #     SERVER_URL: http://server:3000
-    #     FILE_URL: http://minio:9000/
-    #   ports: 
-    #      -  "5713:80"
-    #   networks:
-    #      - my_network    
+    web: 
+      image: wev-client:1.0.0
+      container_name: my-web-app
+      environment:
+        SERVER_URL: http://server:3000
+        FILE_URL: http://minio:9000/
+      ports: 
+         -  "5713:80"
+      networks:
+         - my_network    
 
-    # server: 
-    #   image: server-teste:1.0.0.
-    #   container_name: my-server
-    #   environment:
-    #     DATABASE_URL: "mysql://root:admin123@my_mysql_container:3306/meng_admin"
-    #     EXPIRE: 60 * 60 * 2
-    #     REFRESHEXPIRE: 60 * 60 * 24 * 7
+    server: 
+      image: server-teste:1.0.0.
+      container_name: my-server
+      environment:
+        DATABASE_URL: "mysql://root:admin123@my_mysql_container:3306/meng_admin"
+        EXPIRE: 60 * 60 * 2
+        REFRESHEXPIRE: 60 * 60 * 24 * 7
 
-    #   ports: 
-    #      -  "3000:3000"
-    #      -  "3001:3001"
-    #   networks:
-    #      - my_network
-    #   depends_on: 
-    #      - mysql
-    #      - redis
-    #      - minio    
+      ports: 
+         -  "3000:3000"
+         -  "3001:3001"
+      networks:
+         - my_network
+      depends_on: 
+         - mysql
+         - redis
+         - minio    
 
 
   networks:

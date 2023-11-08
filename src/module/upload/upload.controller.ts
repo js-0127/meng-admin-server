@@ -2,8 +2,8 @@ import { Controller,Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import { NotLogin } from 'src/common/decorator/not-login.decorator';
 import { AuthInterceptor } from 'src/common/interceptor/auth.interceptor';
+import { NotLogin } from 'src/common/decorator/not-login.decorator';
 
 
 @Controller('file')

@@ -11,6 +11,7 @@ import { generateRandomCode } from 'src/utils/common/uuid';
 import { RoleAuth } from 'src/common/decorator/auth-role.decorator';
 
 
+
 @Controller('user')
 export class UserController {
   constructor(
@@ -66,6 +67,7 @@ export class UserController {
   @ApiOperation({
     summary: '更新用户信息'
   })
+
   @Put()
   async update(@Body('id') id:string, @Body() body:UpdateUserDto){
     return this.userService.updateUser(id, body)
