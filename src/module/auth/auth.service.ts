@@ -20,10 +20,8 @@ import { getAdressByIp, getIp, getUserAgent } from 'src/utils/common/ip';
 
 @Injectable() 
 export class AuthService {
+  private chekcCapctha:CaptchaType
    //保存验证码
-  private captchas: Map<string, CaptchaType> = new Map();
-  public validaeCaptcha: CaptchaType;
-  
   constructor(
     private readonly prisma:PrismaService,
     private readonly config: ConfigService,
@@ -38,14 +36,9 @@ export class AuthService {
    * @returns {*} captcha
    * @memberof AuthService
    */
-  public genCaptcha(): CaptchaType {
-    //是否生成了相同的验证码
-    let getDiffCapctha = false;
-    let c: svgCaptcha.CaptchaObj;
-    //直到生成captchas中没有的验证码
-    while (!getDiffCapctha) {
+  public async genCaptcha():Promise<CaptchaType> {
       //持续创建
-      c = svgCaptcha.createMathExpr({
+      const c = svgCaptcha.createMathExpr({
         width: 100,
         height: 38,
         color: true,
@@ -53,20 +46,9 @@ export class AuthService {
         mathMax: 9,
         mathOperator: '+'
       });
-      if (!this.captchas.has(c.text)) {
-        const captcha = Object.assign(c, {
-          id: String(Math.random()),
-          time: new Date(),
-        });
-        getDiffCapctha = true;
-        this.captchas.set(c.text, captcha);
-      }
+      this.chekcCapctha = Object.assign(c, { id: uuid(), time: new Date()});
+      return this.chekcCapctha
     }
-    this.validaeCaptcha = this.captchas.get(c.text);
-
-    return this.captchas.get(c.text)
-  }
-
   /**
    * @description 登录返回token
    * @date 09/25/2023
@@ -74,7 +56,6 @@ export class AuthService {
    * @memberof AuthService
    */
   public async login(loginDto: LoginDto, req:Request): Promise<TokenVO> {
-
     const ip = getIp(req)
     const address = getAdressByIp(ip)
     const browser = getUserAgent(req).family
@@ -83,15 +64,17 @@ export class AuthService {
 
     try {
       //验证是否有这个用户
-    const user  = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
-        userName: loginDto.accountNumber
+        userName
       }
     })
+
+    
     if(!user) {
+      console.log(user);
       throw R.error('用户名错误')
     }
-
     //获取私钥并且,把密码解密
    const password =  await this.RsaService.decrypt(loginDto.publicKey, loginDto.password)
    //删除私钥
@@ -105,8 +88,7 @@ export class AuthService {
     if(!await verify(user.password, loginDto.password)) {
       throw R.error('密码错误')
     }
-
-    if(loginDto.captcha !== this.validaeCaptcha.text) {
+    if(loginDto.captcha !== this.chekcCapctha.text) {
       throw R.error('验证码错误')
     }
     
@@ -147,6 +129,8 @@ export class AuthService {
     } as TokenVO;
 
     } catch (error){
+      console.log(error);
+      
         const status = false
         const message = error?.message || '登录失败'
          this.prisma.login_Log.create({
@@ -160,6 +144,7 @@ export class AuthService {
              message
           }
         })
+        throw R.error(message)
     }
 } 
 
@@ -241,7 +226,7 @@ export class AuthService {
                .exec()
                  
 
-               const resetPasswordUrl = ''
+               const resetPasswordUrl = 'http://localhost:5173/user/reset-password'
 
                await this.EmailService.sendEmail({
                 to: emailInfo.email,

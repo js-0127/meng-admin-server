@@ -16,7 +16,6 @@ export class RoleService {
       private readonly prisma: PrismaService,
       private readonly socketGateway: SocketGateway
     ){}
-
   /**
    * @description 获取全部角色
    * @date 10/15/2023
@@ -68,7 +67,6 @@ export class RoleService {
        await Promise.all(roleMenus)
       })
   }
-
   /**
    * @description 分页回去角色列表
    * @date 10/15/2023

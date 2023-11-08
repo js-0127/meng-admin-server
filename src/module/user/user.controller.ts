@@ -23,7 +23,7 @@ export class UserController {
     summary:'分页获取用户信息'
   })  
   @Get('list')
-  findByPage(@Query() query: pageDto) {
+  async findByPage(@Query() query: pageDto) {
     return this.userService.findByPage(query)
   }
 
@@ -31,7 +31,7 @@ export class UserController {
     summary: '创建用户'
   })
   @Post()
-  create(@Body() createUserDto: UserDto) {  
+  async create(@Body() createUserDto: UserDto) {  
     return this.userService.createUser(createUserDto);
   }
   
@@ -67,7 +67,7 @@ export class UserController {
     summary: '更新用户信息'
   })
   @Put()
-  update(@Body('id') id:string, @Body() body:UpdateUserDto){
+  async update(@Body('id') id:string, @Body() body:UpdateUserDto){
     return this.userService.updateUser(id, body)
   }
 
@@ -75,9 +75,9 @@ export class UserController {
     summary: '删除用户',
     description: '需要管理员权限'
   })
-  // @RoleAuth('管理员')
+  @RoleAuth('admin')
   @Delete(':id')
-  delete(@Param('id') id:string){
+  async delete(@Param('id') id:string){
       return this.userService.deleteUser(id)
   }
 }

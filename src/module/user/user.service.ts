@@ -38,7 +38,6 @@ export class UserService {
             }
           }
         )
-        
         const menuIds = await this.prisma.role_Menu.findMany({
           where: {
             roleId: {
@@ -46,7 +45,6 @@ export class UserService {
             }
           }
         })
-        
         const menus = await this.prisma.menu.findMany({
           where: {
             id: {
@@ -59,7 +57,6 @@ export class UserService {
               userId:id
             }
           })
-        
         return Object.assign(user, {menus,fileEntity})
     }
    
@@ -95,18 +92,12 @@ export class UserService {
         ]);
          
         const fileEntitys = await this.prisma.file.findMany()
-       
-        
         let newData = [];
          data.forEach((item) => {item = Object.assign(omit(item, ['password', 'updateAt'])); newData.push(item);
         })
           newData.map((item) => {
             item.user_Role = item.user_Role.map((item) => item.roleId)
-         })
-        
-         newData.map((item) => {
-           item.fileEntity = Object.assign(fileEntitys.filter((fileEntity) => fileEntity.userId === item.id))
-           
+            item.fileEntity = Object.assign(fileEntitys.filter((fileEntity) => fileEntity.userId === item.id))
          })
         return {
           data: newData,
@@ -134,7 +125,6 @@ export class UserService {
             id: id,
             ...omit(createUserDto, ['emailCaptcha', 'user_Role' ]),
             password: await hash(password),
-            sex: +createUserDto.sex
           }
          })
        ])

@@ -35,7 +35,7 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   @NotLogin()
   async getCaptcha() : Promise<CaptchaEntity>{
-    const data = this.authService.genCaptcha()
+    const data = await this.authService.genCaptcha()
     return new CaptchaEntity(data)
   }
  
@@ -44,7 +44,7 @@ export class AuthController {
   })  
   @Get('publicKey')
   @NotLogin()
-  getPublicKey(){
+  async getPublicKey(){
     return this.RsaService.getPublicKey()
   }
 

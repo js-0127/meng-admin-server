@@ -50,7 +50,7 @@ export class MenuController {
     summary: '更新菜单'
   })
   @Put()
-  update(@Body('id') id: string ,@Body() updateMenuDto: UpdateMenuDto) {
+  async update(@Body('id') id: string ,@Body() updateMenuDto: UpdateMenuDto) {
     return this.menuService.update(id, updateMenuDto);
   }
 
@@ -59,7 +59,7 @@ export class MenuController {
     description: '需要管理员权限'
 
   })
-  @RoleAuth('管理员')
+  @RoleAuth('admin')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.menuService.remove(id);

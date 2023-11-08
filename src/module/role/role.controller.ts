@@ -15,7 +15,7 @@ export class RoleController {
     summary: '获取全部角色'
   })
   @Get()
-    async getAllRoles(){
+  async getAllRoles(){
       return this.roleService.getAllRoles()
   }
   
@@ -23,7 +23,7 @@ export class RoleController {
     summary: '分页获取角色列表'
   })
   @Get('list')
-    async getRoleListByPage(@Query() query: RolePageDto) {
+  async getRoleListByPage(@Query() query: RolePageDto) {
       return this.roleService.getRoleListByPage(query);
   }
   
@@ -31,7 +31,7 @@ export class RoleController {
     summary: '获取单个角色'
   })
   @Get(':id')
-    getSingleRole(@Param('id') id: string) {
+  async getSingleRole(@Param('id') id: string) {
       return this.roleService.getSingleRole(id);
   }
 
@@ -72,7 +72,7 @@ export class RoleController {
     summary: '删除角色',
     description: '需要管理员权限'
   })
-  @RoleAuth('管理员')
+  @RoleAuth('admin')
   @Delete(':id')
   async removeRole(@Param('id') id: string) {
     return this.roleService.removeRole(id);

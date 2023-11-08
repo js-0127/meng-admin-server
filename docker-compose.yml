@@ -39,7 +39,7 @@
       #    - my_network      
 
     # web: 
-    #   image: web-client:1.0.0
+    #   image: wev-client:1.0.0
     #   container_name: my-web-app
     #   environment:
     #     SERVER_URL: http://server:3000
@@ -50,7 +50,7 @@
     #      - my_network    
 
     # server: 
-    #   image: server-teste:1.0.0
+    #   image: server-teste:1.0.0.
     #   container_name: my-server
     #   environment:
     #     DATABASE_URL: "mysql://root:admin123@my_mysql_container:3306/meng_admin"
@@ -67,7 +67,6 @@
     #      - redis
     #      - minio    
 
-     
 
   networks:
     my_network:
