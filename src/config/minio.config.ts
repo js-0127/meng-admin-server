@@ -1,11 +1,12 @@
+import {env} from 'process'
 export default () => ({
     minio: {
             isGlobal: true,
-            endPoint: 'localhost',
-            port: 9000,
+            endPoint: env.MINIO_HOST || 'localhost',
+            port: env.MINIO_PORT ? Number(env.MINIO_PORT) : 9002,
             useSSL: false,
-            accessKey: 'minio',
-            secretKey: 'minio@123',
+            accessKey: env.MINIO_ROOT_USER || 'minio',
+            secretKey: env.MINIO_ROOT_PASSWORD || 'minio@123',
           }
     
 })

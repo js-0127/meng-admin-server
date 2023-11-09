@@ -43,7 +43,7 @@
       container_name: my-web-app
       environment:
         SERVER_URL: http://server:3000
-        FILE_URL: http://minio:9000/
+        FILE_URL: http://upload:9000/
       ports: 
          -  "5713:80"
       networks:

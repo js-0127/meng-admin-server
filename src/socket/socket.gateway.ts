@@ -5,7 +5,7 @@ import { RedisClientType } from 'redis';
 import { Server, WebSocket } from 'ws';
 import { SocketMessage, SocketMessageType } from './interface/message';
 
-@WebSocketGateway(3001, {
+@WebSocketGateway(3000, {
   cors: {
     origin: '*'
   },  
