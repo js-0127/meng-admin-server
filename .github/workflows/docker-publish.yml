@@ -3,7 +3,6 @@ name: Docker
 on:
   push:
     branches: ['main']
-    tags: ['v*.*.*']
 
 env:
   REGISTRY: ghcr.io
@@ -66,10 +65,8 @@ jobs:
         uses: D3rHase/ssh-command-action@v0.2.1
         with:
           HOST: ${{ secrets.SERVER_IP }}
-          PORT: 22 # optional, default is 22
-          # user of the server
+          PORT: 22 
           USER: root
-          # private ssh key registered on the server
           PRIVATE_SSH_KEY: ${{ secrets.SERVER_KEY }}
-          # command to be executed
           COMMAND: cd /root && ./run.sh
+
