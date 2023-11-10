@@ -10,14 +10,19 @@ import { SocketGateway } from 'src/socket/socket.gateway';
 import { SocketMessageType } from 'src/socket/interface/message';
 import { snowFlake } from 'src/utils/common/snow-flake';
 import { R } from 'src/utils/common/error';
+import { MINIO_CONNECTION } from 'nestjs-minio';
+import { Client } from 'minio';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('DEFAULT') private readonly redisClient: RedisClientType,
+    @Inject(MINIO_CONNECTION) private readonly minioClient: Client,
     private readonly emailService: EmailService,
-    private readonly socketGateway: SocketGateway
+    private readonly socketGateway: SocketGateway,
+    private readonly configService: ConfigService
     ){}
     
     /**
@@ -180,11 +185,17 @@ export class UserService {
 
     if(fileEntity && fileEntity.filePath != updateUserDto.avatar){
       if(fileEntity && !updateUserDto.avatar){
-        await this.prisma.file.deleteMany({
-          where: {
-            userId: id
-          }
+        this.prisma.$transaction(async(prisma) => {
+         await Promise.all([
+          prisma.file.deleteMany({
+            where: {
+              userId: id
+            }
+          }),
+          this.minioClient.removeObject(this.configService.get('bucket').name, fileEntity.fileName)
+         ])
         })
+        
       } 
       else if(fileEntity && updateUserDto.avatar){
         await this.prisma.file.updateMany({
@@ -193,7 +204,6 @@ export class UserService {
          },
          data: {
           filePath: updateUserDto.avatar,
-          fileName: `${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`,
           userId:id
          }
         })

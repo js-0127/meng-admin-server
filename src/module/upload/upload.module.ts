@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestMinioModule } from 'nestjs-minio';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { PrismaService } from 'src/services/prisma.service';
-import { ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({

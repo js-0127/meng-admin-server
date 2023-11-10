@@ -2,7 +2,6 @@ import { Controller,Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
-import { AuthInterceptor } from 'src/common/interceptor/auth.interceptor';
 import { NotLogin } from 'src/common/decorator/not-login.decorator';
 
 
@@ -16,7 +15,6 @@ export class UploadController {
     summary: '上传文件'
   })
   @Post('upload')
-  @UseInterceptors(AuthInterceptor)
   @UseInterceptors(FileInterceptor('file'))
   @NotLogin()
   async uploadFile(@UploadedFile() file: Express.Multer.File){   

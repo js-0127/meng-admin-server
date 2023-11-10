@@ -7,6 +7,8 @@ export default () => ({
             useSSL: false,
             accessKey: env.MINIO_ROOT_USER || 'minio',
             secretKey: env.MINIO_ROOT_PASSWORD || 'minio@123',
-          }
-    
+          },
+    bucket: {
+      name: 'meng-admin' 
+    }
 })
