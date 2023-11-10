@@ -30,7 +30,7 @@ RUN cd /app && rm -rf /app/dist &&  pnpm run build
 EXPOSE 3000
 # 启动服务
 
-CMD ["pnpm", "run", "start"]
+RUN pnpm run start:prod
 
 
 
