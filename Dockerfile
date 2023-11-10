@@ -26,11 +26,10 @@ RUN cd /app && rm -rf /app/node_modules &&  pnpm install
 # 打包
 RUN cd /app && rm -rf /app/dist &&  pnpm run build
 
-
-EXPOSE 3000
 # 启动服务
-
 RUN pnpm run start:prod
+EXPOSE 3000
+
 
 
 
