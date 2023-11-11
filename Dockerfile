@@ -20,18 +20,18 @@ COPY . ./
 RUN npm config set registry https://registry.npm.taobao.org/
 # npm 安装依赖
 COPY package.json /app/package.json
-RUN rm -rf /app/package-lock.json
-RUN cd /app && rm -rf /app/node_modules &&  pnpm install
 
-# 打包
-RUN cd /app && rm -rf /app/dist &&  pnpm run build
+RUN rm -rf /app/package-lock.json
+RUN cd /app && rm -rf /app/node_modules &&  pnpm install 
+
+RUN cd /app pnpm run prisma migrate dev
+RUN cd /app && rm -rf /app/dist && pnpm build
 
 
 EXPOSE 3000
 # 启动服务
 
-CMD pnpm run start:prod
-
+CMD   pnpm run start:prod
 
 
 
