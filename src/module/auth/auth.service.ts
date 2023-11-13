@@ -245,7 +245,7 @@ export class AuthService {
                   ${resetPasswordUrl}
                 </p>
                 <p>如您未提交该申请，请不要理会此邮件，对此为您带来的不便深表歉意。</p>
-                <p>本次链接30分钟后失效。</p>
+                <p>本次链接30分钟后失效</p>
                 <div style="text-align: right;margin-top: 50px;">
                   <span>meng-admin</span>
                 </div>
