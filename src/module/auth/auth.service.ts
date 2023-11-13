@@ -223,7 +223,7 @@ export class AuthService {
                .exec()
                  
 
-               const resetPasswordUrl = 'http://localhost:5173/user/reset-password'
+               const resetPasswordUrl = `http://121.40.254.241/reset-password?email=${emailInfo.email}&emailCaptcha=${emailCaptcha}`;
 
                await this.EmailService.sendEmail({
                 to: emailInfo.email,

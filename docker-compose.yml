@@ -46,6 +46,7 @@
       environment:
         SERVER_URL: http://server:3000
         FILE_URL: http://minio:9000/
+        WS_URL: http://server:3001
       ports: 
          -  "5713:80"
       networks:
