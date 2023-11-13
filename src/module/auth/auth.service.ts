@@ -60,13 +60,17 @@ export class AuthService {
     const address = getAdressByIp(ip)
     const browser = getUserAgent(req).family
     const os = getUserAgent(req).os.toString()
-    const userName = loginDto.accountNumber
+    const accountNumber = loginDto.accountNumber
 
     try {
       //验证是否有这个用户
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
-        userName
+        OR: [
+          { userName: accountNumber },
+          { email: accountNumber },
+          { phoneNumber: accountNumber}
+        ]
       }
     })
     
@@ -100,7 +104,7 @@ export class AuthService {
         address,
         browser,
         os,
-        userName,
+        userName:accountNumber,
         status,
         message
       }
@@ -136,7 +140,7 @@ export class AuthService {
              os,
              address,
              browser,
-             userName,
+             userName:accountNumber,
              status,
              message
           }
@@ -259,7 +263,7 @@ export class AuthService {
          * @date 10/04/2023
          */
         async resetPassword(resetPasswordDto: ResetPasswordDto){
-           const captcha = await this.redisClient.get(`resetPasswordEmailCaptcha:${resetPasswordDto.email}`)
+           const captcha = await this.redisClient.get(`resetPasswordEmailCaptcha:${resetPasswordDto.emailCaptcha}`)
            if(captcha !== resetPasswordDto.emailCaptcha){
             throw R.error('邮箱验证码错误或已失效')
            }
