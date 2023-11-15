@@ -157,7 +157,7 @@ export class AuthService {
     */
    public async refreshToken(dto: RefreshTokenDTO): Promise<TokenVO>{
           const userId = await this.redisClient.get(
-            `refreshToken${dto.refreshToken}`
+            `refreshToken:${dto.refreshToken}`
           );
           if(!userId){
             throw R.error('刷新token失败')
@@ -168,7 +168,7 @@ export class AuthService {
           await this.redisClient
                  .multi()
                  .set(`token:${token}`, userId)
-                 .expire(`token${token}`, expire)
+                 .expire(`token:${token}`, expire)
                  .exec()
 
           const refreshExpire = await this.redisClient.ttl(
@@ -190,8 +190,8 @@ export class AuthService {
         async logout(req:Request){
           const res = await this.redisClient
             .multi()
-            .del(`token${req['token']}`)
-            .del(`refreshToken${req['userInfo'].refreshToken}`)
+            .del(`token:${req['token']}`)
+            .del(`refreshToken:${req['userInfo'].refreshToken}`)
             .exec()
             if(res.some(item => item[0])){
               throw R.error('退出登录失败')
