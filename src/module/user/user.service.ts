@@ -176,12 +176,13 @@ export class UserService {
    * @param updateUserDto 
    */
   async updateUser(id:string, updateUserDto: UpdateUserDto){
-    updateUserDto = Object.assign(omit(updateUserDto, ['fileEntity','emailCaptcha']))
+  updateUserDto = Object.assign(omit(updateUserDto, ['fileEntity','emailCaptcha']))
    const fileEntity = await this.prisma.file.findFirst({
       where: {
           userId: id
        }
     }) 
+
 
     if(fileEntity && fileEntity.filePath != updateUserDto.avatar){
       if(fileEntity && !updateUserDto.avatar){
@@ -198,14 +199,22 @@ export class UserService {
         
       } 
       else if(fileEntity && updateUserDto.avatar){
-        await this.prisma.file.updateMany({
-         where: {
-           userId: id
-         },
-         data: {
-          filePath: updateUserDto.avatar,
-          userId:id
-         }
+        await this.prisma.$transaction(async(prisma) => {
+          await Promise.all([
+            prisma.file.deleteMany({
+              where: {
+                userId: id
+              }
+             }),
+             this.minioClient.removeObject(this.configService.get('bucket').name, fileEntity.fileName),
+             prisma.file.create({
+              data:{
+                userId: id,
+                filePath: updateUserDto.avatar,
+                fileName:`${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`
+              }
+            })
+          ])
         })
    } 
     } 
