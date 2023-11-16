@@ -25,7 +25,7 @@ export class UploadService {
     const filePath = `/file/${this.configService.get('bucket').name}/${fileName}`
            // 上传文件到minio服务器
           const fileEntity = await this.createFile(fileName, filePath)
-          await this.minioClient.putObject(this.configService.get('bucket').name, filePath, file.buffer)
+          await this.minioClient.putObject(this.configService.get('bucket').name, fileName, file.buffer)
           return fileEntity;
   }
   async createFile(fileName: string,filePath:string){
@@ -52,7 +52,7 @@ export class UploadService {
     await this.prisma.$transaction(async(prisma) => {
        await Promise.all([
         fileRecordToDelete.map(record => {
-          this.minioClient.removeObject(this.configService.get('bucket').name, record.filePath)
+          this.minioClient.removeObject(this.configService.get('bucket').name, record.fileName)
         }),
         prisma.file.deleteMany({
           where: {

@@ -206,11 +206,13 @@ export class UserService {
                 userId: id
               }
              }),
-             prisma.file.create({
+             prisma.file.updateMany({
+              where: {
+                filePath: updateUserDto.avatar
+              },
               data:{
                 userId: id,
-                filePath: updateUserDto.avatar,
-                fileName:`${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`
+                filePath: updateUserDto.avatar
               }
             })
 
