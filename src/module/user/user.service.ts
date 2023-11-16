@@ -193,7 +193,7 @@ export class UserService {
               userId: id
             }
           }),
-          this.minioClient.removeObject(this.configService.get('bucket').name, fileEntity.fileName)
+          this.minioClient.removeObject(this.configService.get('bucket').name, fileEntity.filePath)
          ])
         })
         
@@ -206,7 +206,6 @@ export class UserService {
                 userId: id
               }
              }),
-             this.minioClient.removeObject(this.configService.get('bucket').name, fileEntity.fileName),
              prisma.file.create({
               data:{
                 userId: id,
@@ -214,6 +213,7 @@ export class UserService {
                 fileName:`${Date.now() + '-' + Math.round(Math.random() * 10)}_${updateUserDto.avatar}`
               }
             })
+
           ])
         })
    } 
