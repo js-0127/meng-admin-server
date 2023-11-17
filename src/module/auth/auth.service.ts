@@ -167,7 +167,7 @@ export class AuthService {
 
           await this.redisClient
                  .multi()
-                 .set(`token:${token}`, userId)
+                 .set(`token:${token}`, JSON.stringify({userId: userId, refreshToken:dto.refreshToken}))
                  .expire(`token:${token}`, expire)
                  .exec()
 

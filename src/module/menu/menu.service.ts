@@ -137,7 +137,7 @@ export class MenuService {
   }
 
   async update(id: string, updateMenuDto: UpdateMenuDto) {
-    updateMenuDto = omit(updateMenuDto, ['id', 'hasChild', 'children'])
+    updateMenuDto = omit(updateMenuDto, ['id', 'hasChild', 'children', '_loaded_'])
          await this.prisma.menu.update({
           where: {
             id
