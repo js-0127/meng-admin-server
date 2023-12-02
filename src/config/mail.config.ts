@@ -4,8 +4,8 @@ export default () =>({
         port: 465,
         secure: true,
         auth: {
-        user: '1374744754@qq.com',
-        pass: 'wdoqrjpmcambhjha'
+        user: 'xxx@qq.com',
+        pass: ''
       }
     },
     mailCaptchaExpire: {
