@@ -4,7 +4,7 @@ export default () =>({
         port: 465,
         secure: true,
         auth: {
-        user: 'xxx@qq.com',
+        user: '1374744754@qq.com',
         pass: ''
       }
     },
