@@ -1,0 +1,84 @@
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: my_mysql_container
+    ports:
+      - '3306:3306'
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: meng_admin
+      MYSQL_ROOT_PASSWORD: admin123
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
+
+  redis:
+    image: redis:latest
+    container_name: my_redis_container
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - my_network
+
+  minio:
+    image: bitnami/minio:latest
+    container_name: my-minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio@123
+    volumes:
+      - 'minio_data:/bitnami/minio/data'
+    networks:
+      - my_network
+
+  server:
+    image: server:1.0.0
+    container_name: my-server
+    environment:
+      DATABASE_URL: 'mysql://root:admin123@my_mysql_container:3306/meng_admin'
+      REDIS_HOST: my_redis_container
+      MINIO_HOST: my-minio
+      MINIO_PORT: 9000
+
+    ports:
+      - '3000:3000'
+      - '3001:3001'
+    networks:
+      - my_network
+    depends_on:
+      - mysql
+      - redis
+      - minio
+
+  web:
+    image: web:1.0.0
+    container_name: my-web-app
+    environment:
+      SERVER_URL: http://server:3000
+      FILE_URL: http://minio:9000/
+      WS_URL: http://server:3001
+    ports:
+      - '5713:80'
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
+    driver: local
