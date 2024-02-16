@@ -32,30 +32,54 @@
 $ pnpm install
 ```
 
-## Running the app
+## deploy
 
-```bash
-# development
-$ pnpm run start
+项目为纯 docker 部署需要 docker version >= 24 启动项目前需要将数据库整理好，sql 文件会放在仓库里
 
-# watch mode
-$ pnpm run start:dev
+### 数据库操作
 
-# production mode
-$ pnpm run start:prod
+首先进入 mysql 容器
+
+```
+docker ps //查看正在启动的容器
+docker exec -it 容器id /bin/sh
 ```
 
-## Test
+```
+mysql -u root -p
+use meng_admin
+source sql文件(路径)
+```
 
-```bash
-# unit tests
-$ pnpm run test
+若出现服务器 ip 不能连接数据库问题，执行以下命令
 
-# e2e tests
-$ pnpm run test:e2e
+```
+CREATE USER 'root'@'%' IDENTIFIED BY 'admin123';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
 
-# test coverage
-$ pnpm run test:cov
+### nest 后端
+
+需要同步 prisma 结构
+
+首先进入 nest 后端容器
+
+```
+docker ps //查看正在启动的容器
+docker exec -it 容器id /bin/sh
+```
+
+执行
+
+```
+prisma migrate dev
+```
+
+## Running the app
+
+```
+docker-compose up
 ```
 
 ## Support
