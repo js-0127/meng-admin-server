@@ -36,6 +36,12 @@ $ pnpm install
 
 项目为纯 docker 部署需要 docker version >= 24 启动项目前需要将数据库整理好，sql 文件会放在仓库里
 
+将后端文件打包成 docker 镜像(需要先执行上面的 pnpm install)
+
+```
+docker build -t 镜像名称[:tag] ./
+```
+
 ### 数据库操作
 
 首先进入 mysql 容器
